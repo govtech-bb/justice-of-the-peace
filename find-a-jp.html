@@ -375,7 +375,7 @@
               <a class="govbb-breadcrumbs__link" href="/legal-and-justice">Legal and justice</a>
             </li>
             <li class="govbb-breadcrumbs__item">
-              <a class="govbb-breadcrumbs__link" href="justice-of-the-peace.html">Justice of the Peace</a>
+              <a class="govbb-breadcrumbs__link" href="index.html">Justice of the Peace</a>
             </li>
           </ol>
         </nav>
@@ -383,7 +383,7 @@
         <header class="jp-page__head">
           <h1 class="govbb-text-display">Find a Justice of the Peace</h1>
           <p class="govbb-text-body jp-back-link">
-            New here? <a class="govbb-link" href="justice-of-the-peace.html">Read what a JP does and what to bring</a> before you search.
+            New here? <a class="govbb-link" href="index.html">Read what a JP does and what to bring</a> before you search.
           </p>
           <p class="govbb-text-caption">Source: Supreme Court of Barbados — official JP register, last updated 30 April 2023.</p>
         </header>
@@ -2523,9 +2523,30 @@
     window.runSearch   = runSearch;
     window.clearSearch = clearSearch;
 
-    /* Click a name in the list (or a popup's "Show in list" button) to focus
-       that JP. The map hides every other pin and zooms to the chosen one.
-       Click again to clear focus and bring every pin back. */
+    /* Apply current focus state to the markers already on the map. When a JP
+       is focused we hide the others by making them transparent and
+       non-interactive, instead of removing/re-adding them — that way the
+       focused marker keeps the same click handler and clicking it again
+       toggles focus off. */
+    function applyMarkerFocus() {
+      Object.keys(markerMap).forEach(function(id) {
+        var m = markerMap[id];
+        var el = m.getElement();
+        if (!el) return;
+        if (focusedJpId === null || parseInt(id, 10) === focusedJpId) {
+          el.style.opacity = '1';
+          el.style.pointerEvents = 'auto';
+        } else {
+          el.style.opacity = '0';
+          el.style.pointerEvents = 'none';
+        }
+      });
+    }
+
+    /* Single source of truth for the pin↔list link.
+       Clicking a list row OR clicking a pin both call this with the same id.
+       First call focuses (highlight row, scroll list, zoom map, open popup,
+       hide other pins). Second call with the same id un-focuses. */
     window.toggleFocus = function(id) {
       var same = (focusedJpId === id);
       document.querySelectorAll('.jp-list__item--highlight').forEach(function(el) {
@@ -2535,7 +2556,9 @@
       if (same) {
         focusedJpId = null;
         if (jpMap) {
-          updateMarkers(currentResults);
+          var fm = markerMap[id];
+          if (fm) fm.closePopup();
+          applyMarkerFocus();
           if (radiusCircle) {
             jpMap.fitBounds(radiusCircle.getBounds(), {padding:[20,20]});
           } else if (selectedParish && PARISH_BOUNDS[selectedParish]) {
@@ -2547,6 +2570,20 @@
         return;
       }
       focusedJpId = id;
+
+      /* If the focused JP's row isn't currently rendered (it's paginated out),
+         grow displayCount so the row appears in the DOM before we highlight. */
+      var idx = -1;
+      for (var i = 0; i < currentResults.length; i++) {
+        if (currentResults[i].id === id) { idx = i; break; }
+      }
+      if (idx >= 0 && idx + 1 > displayCount) {
+        displayCount = Math.ceil((idx + 1) / PAGE_SIZE) * PAGE_SIZE;
+        var parishVal = document.getElementById('parish').value;
+        var contextLabel = locationSetByParish ? parishVal : pickedLocation ? 'your location' : null;
+        renderResults(contextLabel);
+      }
+
       var row = document.querySelector('[data-jp-id="' + id + '"]');
       if (row) {
         row.classList.add('jp-list__item--highlight');
@@ -2556,7 +2593,7 @@
       if (jpMap) {
         var jp = JPS[id];
         if (jp && jp.lat && jp.lng) {
-          updateMarkers([jp]);
+          applyMarkerFocus();
           jpMap.setView([jp.lat, jp.lng], 15, {animate: true});
           var marker = markerMap[jp.id];
           if (marker) marker.openPopup();
@@ -2564,7 +2601,8 @@
       }
     };
 
-    /* Kept for backward-compatibility — popup button calls this. */
+    /* Legacy popup button used to call this; the button is gone now but the
+       symbol is kept so older inline handlers don't throw. */
     window.scrollToCard = function(id) { toggleFocus(id); };
 
     window.locateMe = function() {
@@ -2620,7 +2658,6 @@
       if (!markerLayer) return;
       markerLayer.clearLayers();
       markerMap = {};
-      var showDetails = list.length > 0;
       list.forEach(function(jp) {
         if (!jp.lat || !jp.lng) return;
         var m = L.marker([jp.lat, jp.lng], { icon: jpIcon(), title: jp.name });
@@ -2629,14 +2666,18 @@
         m.bindPopup(
           '<strong style="font-size:13px;display:block;margin-bottom:3px">' + esc(jp.name) + '</strong>' +
           '<span style="font-size:12px;color:#555;display:block">' + esc(jp.parish) + '</span>' +
-          '<span style="font-size:12px;display:block;margin:2px 0 6px">' + pTag + esc(pAddr.text) + '</span>' +
-          (showDetails
-            ? '<button onclick="scrollToCard(' + jp.id + ')" style="background:#0F6E56;color:#fff;border:none;padding:6px 12px;font-size:12px;cursor:pointer;border-radius:2px;width:100%">Show in list</button>'
-            : '')
+          '<span style="font-size:12px;display:block;margin:2px 0 6px">' + pTag + esc(pAddr.text) + '</span>'
         );
+        /* Clicking a pin focuses the matching list row (and vice versa via
+           toggleFocus). Click again to un-focus and bring all pins back. */
+        m.on('click', function() {
+          if (window.toggleFocus) window.toggleFocus(jp.id);
+        });
         markerLayer.addLayer(m);
         markerMap[jp.id] = m;
       });
+      /* Re-apply focus state in case markers were rebuilt while focused. */
+      applyMarkerFocus();
     }
 
     /* ── Leaflet initialisation ──────────────────────────────────────── */
