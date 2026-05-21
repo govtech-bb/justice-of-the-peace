@@ -7,38 +7,158 @@
     <link rel="stylesheet" href="https://unpkg.com/@govtech-bb/styles@1.0.0-alpha.16/dist/styles.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-      /* Service template layout - copied verbatim from service.md */
-      .service-page {
-        padding-block: var(--spacing-m);
+      /* Desktop-first layout — list and map sit side by side. */
+      .jp-page {
+        padding-block: var(--spacing-l);
         display: flex;
         flex-direction: column;
         gap: var(--spacing-m);
       }
-      .service__grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: var(--spacing-m);
-      }
-      .service__main {
+      .jp-page__head {
         display: flex;
         flex-direction: column;
-        gap: var(--spacing-m);
-      }
-      .service__meta {
+        gap: var(--spacing-xs);
         padding-bottom: var(--spacing-s);
         border-bottom: 4px solid var(--color-blue-10);
+      }
+      .jp-back-link {
+        font-size: var(--font-size-body-small);
         color: var(--color-mid-grey-00);
       }
-      .service__sections {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-m);
+
+      /* Filter / search box runs along the top — 2-column grid, single row */
+      .jp-search-box {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: var(--spacing-m);
+        row-gap: var(--spacing-s);
+        align-items: end;
+        padding: var(--spacing-m);
+        background: var(--color-grey-00);
+        border: 1px solid var(--color-light-grey-20);
       }
-      .service__section {
+      .jp-search-box .govbb-form-group { margin: 0; }
+      .jp-search-box .govbb-btn { width: 100%; }
+
+      /* Two-column layout: list left, map right */
+      .jp-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+        gap: var(--spacing-l);
+        align-items: start;
+      }
+      .jp-layout__list { min-width: 0; }
+      .jp-layout__map {
+        position: sticky;
+        top: var(--spacing-m);
         display: flex;
         flex-direction: column;
+        gap: var(--spacing-xs);
+      }
+      .jp-map-hint {
+        color: var(--color-mid-grey-00);
+        font-size: var(--font-size-body-small);
+        margin: 0;
+      }
+      .jp-map-disclaimer {
+        margin: 0;
+        padding: var(--spacing-s) var(--spacing-m);
+        background: var(--color-yellow-40);
+        border-left: 4px solid var(--color-yellow-100);
+        color: var(--color-dark-grey-00);
+        font-size: var(--font-size-body-small);
+        line-height: var(--line-height-body);
+      }
+      #jp-map {
+        height: 620px;
+        width: 100%;
+        border: 1px solid var(--color-light-grey-20);
+      }
+
+      /* Results meta line above the list */
+      .jp-results-meta {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
         gap: var(--spacing-s);
+        padding-bottom: var(--spacing-xs);
+        border-bottom: 2px solid var(--color-dark-grey-00);
       }
+
+      /* Line-separated list of JPs */
+      .jp-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .jp-list__item {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: var(--spacing-xs) var(--spacing-s);
+        padding: var(--spacing-s) var(--spacing-xs);
+        border-bottom: 1px solid var(--color-light-grey-20);
+        cursor: pointer;
+        transition: background 120ms;
+      }
+      .jp-list__item:hover { background: var(--color-grey-00); }
+      .jp-list__item:focus-visible {
+        outline: 4px solid var(--color-teal-100);
+        outline-offset: -4px;
+      }
+      .jp-list__item--highlight,
+      .jp-list__item--highlight:hover {
+        background: var(--color-yellow-40);
+        border-left: 4px solid var(--color-yellow-100);
+        padding-left: calc(var(--spacing-xs) - 4px);
+      }
+      .jp-list__name {
+        font-size: var(--font-size-h3);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-dark-grey-00);
+        margin: 0;
+        line-height: 1.3;
+      }
+      .jp-list__parish {
+        display: inline-block;
+        font-size: 11px;
+        padding: 2px 7px;
+        background: var(--color-light-grey-20);
+        color: var(--color-dark-grey-00);
+        margin: var(--spacing-xs) 0 0;
+        align-self: start;
+        justify-self: start;
+      }
+      .jp-list__address {
+        grid-column: 1 / -1;
+        font-size: var(--font-size-body-small);
+        color: var(--color-mid-grey-00);
+        margin: 0;
+        line-height: var(--line-height-body);
+      }
+      .jp-list__addr-tag {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: var(--font-weight-bold);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        padding: 1px 6px;
+        margin-right: 4px;
+        background: var(--color-light-grey-20);
+        color: var(--color-dark-grey-00);
+        vertical-align: 1px;
+      }
+      .jp-list__dist {
+        font-size: 11px;
+        font-weight: var(--font-weight-bold);
+        padding: 3px 8px;
+        background: var(--color-green-00);
+        color: #fff;
+        white-space: nowrap;
+        align-self: start;
+        justify-self: end;
+      }
+
+      /* Feedback box (kept from service template) */
       .service__feedback {
         display: flex;
         flex-direction: column;
@@ -48,164 +168,20 @@
         background: var(--color-yellow-40);
         padding: var(--spacing-xm) var(--spacing-s);
       }
-      @media (width >= 1024px) {
-        .service__grid {
-          grid-template-columns: repeat(3, 1fr);
-          gap: var(--spacing-xl);
-        }
-        .service__main {
-          grid-column: span 2;
-        }
-      }
 
-      /* Filter block CSS - copied verbatim from filter.md */
-      /* Retained for any future use of govbb-filter elsewhere */
-      .govbb-filter { display: flex; flex-direction: column; margin-bottom: var(--spacing-s); }
-
-      /* Search box */
-      .jp-search-box {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-s);
-        padding: var(--spacing-m);
-        background: var(--color-grey-00);
-        border: 1px solid var(--color-light-grey-20);
-      }
-      .jp-search-box .govbb-form-group { margin: 0; }
-      .jp-map-label {
-        margin-top: var(--spacing-s);
-        color: var(--color-mid-grey-00);
-        font-size: var(--font-size-body-small);
-      }
-
-      /* Map */
-      #jp-map {
-        height: 360px;
-        width: 100%;
-        border: 1px solid var(--color-light-grey-20);
-        margin-top: var(--spacing-xs);
-      }
-
-      /* JP page styles using design system tokens only */
-      .jp-inset {
-        border-left: 4px solid var(--color-blue-40);
-        padding: var(--spacing-s) var(--spacing-m);
-      }
-      .jp-inset p { margin: 0; }
-
-      /* Stacked scenario list - mobile first, no table */
-      .jp-scenario-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-      .jp-scenario {
-        padding: var(--spacing-m) 0;
-        border-bottom: 1px solid var(--color-light-grey-20);
-      }
-      .jp-card--highlight { outline: 3px solid #0F6E56; outline-offset: 2px; transition: outline 0.3s; }
-      .jp-scenario--last {
-        border-bottom: none;
-      }
-      .jp-scenario__need {
-        font-size: var(--font-size-body);
-        font-weight: var(--font-weight-bold);
-        color: var(--color-dark-grey-00);
-        margin: 0 0 var(--spacing-xs);
-      }
-      .jp-scenario__who {
-        font-size: var(--font-size-body-small);
-        color: var(--color-mid-grey-00);
-        margin: 0 0 var(--spacing-xs);
-        line-height: var(--line-height-body);
-      }
-      .jp-scenario__cost-note {
-        font-size: var(--font-size-body-small);
-        color: var(--color-mid-grey-00);
-      }
-      .jp-tag-free {
-        display: inline-block;
-        font-size: 11px;
-        font-weight: var(--font-weight-bold);
-        padding: 1px 6px;
-        background: var(--color-blue-10);
-        color: var(--color-dark-blue-00);
-      }
-      .jp-tag-fee {
-        display: inline-block;
-        font-size: 11px;
-        font-weight: var(--font-weight-bold);
-        padding: 1px 6px;
-        background: var(--color-light-grey-20);
-        color: var(--color-dark-grey-00);
-      }
-
-      .jp-results {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-s);
-        margin-top: var(--spacing-s);
-      }
-      .jp-results__header {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        padding-bottom: var(--spacing-xs);
-        border-bottom: 1px solid var(--color-light-grey-20);
-      }
-      .jp-card-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-s);
-      }
-      .jp-card {
-        padding: var(--spacing-m);
-        border: 1px solid var(--color-light-grey-20);
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-xs);
-      }
-      .jp-card__name { margin: 0; }
-      .jp-card dl { margin: 0; }
-      .jp-card__detail {
-        display: flex;
-        gap: var(--spacing-s);
-        font-size: var(--font-size-body-small);
-        line-height: var(--line-height-body);
-      }
-      .jp-card__detail dt {
-        color: var(--color-mid-grey-00);
-        min-width: 7ch;
-        flex-shrink: 0;
-      }
-      .jp-card__detail dd { margin: 0; }
-      .jp-card__badge {
-        display: inline-block;
-        font-size: var(--font-size-body-small);
-        font-weight: var(--font-weight-bold);
-        padding: 2px 8px;
-        background: var(--color-blue-10);
-        color: var(--color-dark-blue-00);
-        margin-top: var(--spacing-xs);
-      }
-
-      .jp-tip {
-        border-left: 4px solid var(--color-yellow-100);
-        background: var(--color-yellow-40);
-        padding: var(--spacing-s) var(--spacing-m);
-      }
-      .jp-tip p { margin: 0; }
-
+      /* No-results panel */
       .jp-no-results {
         display: flex;
         flex-direction: column;
         gap: var(--spacing-s);
         padding-top: var(--spacing-s);
       }
-
+      .jp-tip {
+        border-left: 4px solid var(--color-yellow-100);
+        background: var(--color-yellow-40);
+        padding: var(--spacing-s) var(--spacing-m);
+      }
+      .jp-tip p { margin: 0; }
       .jp-clear {
         background: none;
         border: none;
@@ -223,7 +199,7 @@
         outline-offset: 1px;
       }
 
-      /* Ensure secondary buttons are always visibly styled */
+      /* Secondary buttons styled to match the design system */
       .govbb-btn--secondary {
         background: transparent !important;
         border: 2px solid #0F6E56 !important;
@@ -234,26 +210,6 @@
         background: #0F6E56 !important;
         color: #fff !important;
       }
-      /* Button grid: Find a JP full-width, then 2-col, then Clear centred */
-      .jp-search-box .govbb-btn-group {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--spacing-xs);
-      }
-      /* Find a JP — spans both columns */
-      .jp-search-box .govbb-btn-group #findBtn {
-        grid-column: span 2;
-      }
-      /* Clear — spans both columns, centred */
-      .jp-search-box .govbb-btn-group #clearBtn {
-        grid-column: span 2;
-        justify-self: center;
-        min-width: 140px;
-      }
-
-      /* Pick-mode cursor */
-      #jp-map.jp-map--pick-mode .leaflet-container { cursor: crosshair !important; }
-      #jp-map.jp-map--pick-mode .leaflet-interactive { cursor: crosshair !important; }
 
       /* Radius picker — shown when a location pin is active */
       .jp-radius-group {
@@ -263,6 +219,7 @@
         padding: var(--spacing-s) var(--spacing-m);
         background: var(--color-blue-10);
         border-left: 4px solid var(--color-blue-40);
+        grid-column: 1 / -1;
       }
       .jp-radius-group.jp-radius-group--visible { display: flex; }
       .jp-radius-group__legend {
@@ -294,74 +251,70 @@
         border-color: var(--color-dark-blue-00);
       }
 
-      /* Card redesign */
-      .jp-card {
-        position: relative;
-      }
-      .jp-card__top {
+      /* JP marker (icon, not plain dot) */
+      .jp-marker {
+        width: 28px;
+        height: 28px;
+        background: #0F6E56;
+        border: 2px solid #fff;
+        border-radius: 50%;
         display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: var(--spacing-s);
-      }
-      .jp-card__dist {
-        flex-shrink: 0;
-        font-size: 11px;
-        font-weight: var(--font-weight-bold);
-        padding: 3px 8px;
-        background: var(--color-green-00);
+        align-items: center;
+        justify-content: center;
         color: #fff;
-        white-space: nowrap;
-        margin-top: 3px;
+        font-weight: 700;
+        font-size: 12px;
+        font-family: 'Source Sans Pro', system-ui, sans-serif;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        cursor: pointer;
       }
-      .jp-card__parish-chip {
-        display: inline-block;
+      .jp-marker--cluster {
+        background: var(--color-dark-blue-00);
         font-size: 11px;
-        padding: 2px 7px;
-        background: var(--color-light-grey-20);
-        color: var(--color-dark-grey-00);
-        margin-bottom: var(--spacing-xs);
-      }
-      .jp-card__address {
-        font-size: var(--font-size-body-small);
-        color: var(--color-mid-grey-00);
-        margin: 0;
-        line-height: var(--line-height-body);
-      }
-      .jp-card__map-hint {
-        font-size: 11px;
-        color: var(--color-mid-grey-00);
-        margin: var(--spacing-xs) 0 0;
-      }
-      .jp-results__cap-note {
-        font-size: var(--font-size-body-small);
-        color: var(--color-mid-grey-00);
-        padding: var(--spacing-xs) 0;
+        padding: 0 4px;
+        min-width: 28px;
+        width: auto;
+        border-radius: 14px;
       }
 
       /* Parish clickable labels on map */
       .jp-parish-btn { background: none; border: none; padding: 0; }
       .jp-parish-label {
         display: inline-block;
-        background: rgba(255,255,255,0.88);
-        border: 1.5px solid #0F6E56;
-        border-radius: 3px;
-        padding: 2px 7px;
-        font-size: 11px;
-        font-weight: 600;
+        background: #fff;
+        border: 2px solid #0F6E56;
+        border-radius: 999px;
+        padding: 3px 10px;
+        font-size: 12px;
+        font-weight: 700;
         color: #085041;
         cursor: pointer;
         white-space: nowrap;
         line-height: 1.4;
-        transition: background 150ms, color 150ms;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+        transform: translate(-50%, -50%);
+        transition: background 150ms, color 150ms, transform 120ms;
       }
-      .jp-parish-label:hover {
-        background: #0F6E56;
-        color: #fff;
+      .jp-parish-label:hover { background: #0F6E56; color: #fff; transform: translate(-50%, -50%) scale(1.05); }
+      .jp-parish-label--active { background: #0F6E56; color: #fff; }
+
+      .jp-show-more {
+        margin-top: var(--spacing-s);
+        width: 100%;
       }
-      .jp-parish-label--active {
-        background: #0F6E56;
-        color: #fff;
+
+      /* Stack the list and map only on smaller viewports. Map comes first. */
+      @media (max-width: 900px) {
+        .jp-search-box { grid-template-columns: 1fr; }
+        .jp-layout {
+          grid-template-columns: 1fr;
+        }
+        .jp-layout__map {
+          position: static;
+          order: 1;
+        }
+        .jp-layout__list { order: 2; }
+        #jp-map { height: 380px; }
       }
     </style>
   </head>
@@ -411,7 +364,7 @@
         </div>
       </div>
 
-      <div class="govbb-container service-page">
+      <div class="govbb-container jp-page">
 
         <nav class="govbb-breadcrumbs" aria-label="Breadcrumb">
           <ol class="govbb-breadcrumbs__list">
@@ -421,203 +374,83 @@
             <li class="govbb-breadcrumbs__item">
               <a class="govbb-breadcrumbs__link" href="/legal-and-justice">Legal and justice</a>
             </li>
+            <li class="govbb-breadcrumbs__item">
+              <a class="govbb-breadcrumbs__link" href="justice-of-the-peace.html">Justice of the Peace</a>
+            </li>
           </ol>
         </nav>
 
-        <div class="service__grid">
-          <div class="service__main">
+        <header class="jp-page__head">
+          <h1 class="govbb-text-display">Find a Justice of the Peace</h1>
+          <p class="govbb-text-body jp-back-link">
+            New here? <a class="govbb-link" href="justice-of-the-peace.html">Read what a JP does and what to bring</a> before you search.
+          </p>
+          <p class="govbb-text-caption">Source: Supreme Court of Barbados — official JP register, last updated 30 April 2023.</p>
+        </header>
 
-            <h1 class="govbb-text-display">Find a Justice of the Peace (JP)</h1>
+        <section class="jp-search-box" aria-label="Filter Justices of the Peace">
 
-            <div class="service__meta">
-              <p class="govbb-text-caption">Last updated: 30 April 2023</p>
+          <div class="govbb-form-group">
+            <label class="govbb-label" for="parish">Parish</label>
+            <div class="govbb-select-wrapper">
+              <select class="govbb-select" id="parish" name="parish" onchange="runSearch()">
+                <option value="">All parishes</option>
+                <option value="Christ Church">Christ Church</option>
+                <option value="St. Andrew">St. Andrew</option>
+                <option value="St. George">St. George</option>
+                <option value="St. James">St. James</option>
+                <option value="St. John">St. John</option>
+                <option value="St. Joseph">St. Joseph</option>
+                <option value="St. Lucy">St. Lucy</option>
+                <option value="St. Michael">St. Michael</option>
+                <option value="St. Peter">St. Peter</option>
+                <option value="St. Philip">St. Philip</option>
+                <option value="St. Thomas">St. Thomas</option>
+              </select>
+              <span class="govbb-select__chevron" aria-hidden="true">
+                <svg viewBox="0 0 12 8"><path d="M6 0 0 8h12z" /></svg>
+              </span>
             </div>
-
-            <div class="service__sections">
-
-              <!-- Overview -->
-              <section class="service__section">
-                <p class="govbb-text-body">
-                  Use this to find a JP in Barbados. A JP can witness your signature, make a sworn statement or confirm a copy of a document is genuine.
-                </p>
-                <div class="jp-inset">
-                  <p class="govbb-text-body">
-                    A JP is someone from your community who has been appointed by the Government of Barbados to help people with documents. It could be a neighbour, a colleague or someone from your church. You may already know one. If you do, you can go to them directly. This service is free and JPs are not allowed to charge you.
-                  </p>
-                </div>
-              </section>
-
-              <!-- Who can help -->
-              <section class="service__section">
-                <h2 class="govbb-text-h2">Who can help you</h2>
-                <p class="govbb-text-body">
-                  Who you need depends on what you are trying to do. Check the instructions on your document first.
-                </p>
-
-                <details class="govbb-show-hide">
-                  <summary class="govbb-show-hide__summary">See who can help with different situations</summary>
-                  <div class="govbb-show-hide__content">
-
-                    <ul class="jp-scenario-list">
-
-                      <li class="jp-scenario">
-                        <p class="jp-scenario__need">Watch you sign a document</p>
-                        <p class="jp-scenario__who">A JP</p>
-                        <span class="jp-tag-free">Free</span>
-                      </li>
-
-                      <li class="jp-scenario">
-                        <p class="jp-scenario__need">Confirm a photocopy is a true copy of the original (certify a copy)</p>
-                        <p class="jp-scenario__who">A JP</p>
-                        <span class="jp-tag-free">Free</span>
-                      </li>
-
-                      <li class="jp-scenario">
-                        <p class="jp-scenario__need">Sign a written declaration in front of a witness (affidavit)</p>
-                        <p class="jp-scenario__who">A JP or a lawyer (attorney-at-law)</p>
-                        <span class="jp-tag-free">Free</span> <span class="jp-scenario__cost-note">if a JP</span>
-                        <br>
-                        <span class="jp-tag-fee">Fee applies</span> <span class="jp-scenario__cost-note">if a lawyer</span>
-                      </li>
-
-                      <li class="jp-scenario">
-                        <p class="jp-scenario__need">Get a document officially stamped for use in Barbados or overseas</p>
-                        <p class="jp-scenario__who">A lawyer or chartered accountant who is registered as a notary public. Since September 2024, lawyers and chartered accountants with 15 or more years of experience can register. Your own lawyer or accountant may be able to help. Ask them directly.</p>
-                        <span class="jp-tag-fee">Fee applies</span>
-                      </li>
-
-                      <li class="jp-scenario">
-                        <p class="jp-scenario__need">Send a document to another country</p>
-                        <p class="jp-scenario__who">A notary public. You may also need an official stamp accepted overseas (apostille) from the Supreme Court.</p>
-                        <span class="jp-tag-fee">Fee applies</span>
-                      </li>
-
-                      <li class="jp-scenario jp-scenario--last">
-                        <p class="jp-scenario__need">Get legal advice or help with a court matter</p>
-                        <p class="jp-scenario__who">A lawyer only. A JP cannot give legal advice.</p>
-                        <span class="jp-tag-fee">Fee applies</span>
-                      </li>
-
-                    </ul>
-
-                    <p class="govbb-text-body" style="margin-top: var(--spacing-s);">
-                      Still not sure? Call the Supreme Court on 246-535-9700.
-                    </p>
-
-                  </div>
-                </details>
-
-              </section>
-
-              <!-- Search -->
-              <section class="service__section">
-                <h2 class="govbb-text-h2">Find a JP near you</h2>
-
-                <!-- Unified search: text fields first, map below -->
-                <div class="jp-search-box">
-
-                  <div class="govbb-form-group">
-                    <label class="govbb-label" for="parish">Parish</label>
-                    <div class="govbb-select-wrapper">
-                      <select class="govbb-select" id="parish" name="parish" onchange="runSearch()">
-                        <option value="">All parishes</option>
-                        <option value="Christ Church">Christ Church</option>
-                        <option value="St. Andrew">St. Andrew</option>
-                        <option value="St. George">St. George</option>
-                        <option value="St. James">St. James</option>
-                        <option value="St. John">St. John</option>
-                        <option value="St. Joseph">St. Joseph</option>
-                        <option value="St. Lucy">St. Lucy</option>
-                        <option value="St. Michael">St. Michael</option>
-                        <option value="St. Peter">St. Peter</option>
-                        <option value="St. Philip">St. Philip</option>
-                        <option value="St. Thomas">St. Thomas</option>
-                      </select>
-                      <span class="govbb-select__chevron" aria-hidden="true">
-                        <svg viewBox="0 0 12 8"><path d="M6 8 0 0h12z" /></svg>
-                      </span>
-                    </div>
-                  </div>
-
-                  <div class="govbb-form-group">
-                    <label class="govbb-label" for="jp-area">Community or area</label>
-                    <p class="govbb-hint" id="area-hint">For example, Fairy Valley, Six Cross Roads, Speightstown</p>
-                    <div class="govbb-input-wrapper">
-                      <input
-                        class="govbb-input"
-                        id="jp-area"
-                        name="jp-area"
-                        type="search"
-                        autocomplete="off"
-                        aria-describedby="area-hint"
-                      />
-                    </div>
-                  </div>
-
-                  <div class="govbb-btn-group">
-                    <button class="govbb-btn" type="button" id="findBtn" onclick="runSearch()">Find a JP</button>
-                    <button class="govbb-btn govbb-btn--secondary" type="button" id="geoBtn" onclick="locateMe()">Use my location</button>
-                    <button class="govbb-btn govbb-btn--secondary" type="button" id="pickBtn" onclick="togglePickMode()">Pick on map</button>
-                    <button class="govbb-btn govbb-btn--secondary" type="button" id="clearBtn" onclick="clearSearch()">Clear</button>
-                  </div>
-
-                  <!-- Radius picker: hidden until a location pin is set -->
-                  <div class="jp-radius-group" id="jp-radius-group" role="group" aria-labelledby="radius-legend">
-                    <p class="jp-radius-group__legend" id="radius-legend">Show JPs within</p>
-                    <div class="jp-radius-pills">
-                      <button class="jp-radius-pill jp-radius-pill--active" type="button" data-mi="5" onclick="setRadius(5)">5 miles</button>
-                      <button class="jp-radius-pill" type="button" data-mi="10" onclick="setRadius(10)">10 miles</button>
-                      <button class="jp-radius-pill" type="button" data-mi="15" onclick="setRadius(15)">15 miles</button>
-                      <button class="jp-radius-pill" type="button" data-mi="0" onclick="setRadius(0)">Island-wide</button>
-                    </div>
-                  </div>
-
-                </div>
-
-                <!-- Map: updates when parish selected, shows all JPs by default -->
-                <p class="govbb-text-body jp-map-label" id="jp-map-hint">Tap a parish name on the map to zoom in and see JPs in that area.</p>
-                <div id="jp-map" role="application" aria-label="Map of Barbados. Click a parish name to filter results."></div>
-
-                <div id="resultsArea" aria-live="polite" aria-atomic="true"></div>
-
-              </section>
-
-              <!-- What to bring -->
-              <section class="service__section">
-                <h2 class="govbb-text-h2">What to bring</h2>
-                <ul class="govbb-list govbb-list--bullet">
-                  <li>A photo ID, like your passport or driving licence</li>
-                  <li>The original document. Do not sign it before your visit if someone needs to watch you sign.</li>
-                  <li>Any copies your document asks for</li>
-                </ul>
-              </section>
-
-              <!-- About this list -->
-              <section class="service__section">
-                <h2 class="govbb-text-h2">About this list</h2>
-                <p class="govbb-text-body">
-                  This list is from the official JP register, last updated on 30 April 2023.
-                </p>
-                <p class="govbb-text-body">
-                  More than 560 new JPs took up their role in January 2026. They are not in this list yet.
-                </p>
-                <p class="govbb-text-body">
-                  If you cannot find a JP near you, contact your local Member of Parliament (MP)'s office. JPs are chosen by MPs, so your MP may know someone in your area.
-                </p>
-              </section>
-
-            </div>
-
-            <div class="service__feedback">
-              <h3 class="govbb-text-h3">Was this helpful?</h3>
-              <p class="govbb-text-body">Give us your feedback about this page.</p>
-              <a class="govbb-link govbb-link--secondary govbb-font-body" href="/feedback"
-                >Help us improve alpha.gov.bb</a
-              >
-            </div>
-
           </div>
+
+          <div class="govbb-form-group">
+            <label class="govbb-label" for="geoBtn">Your location</label>
+            <button class="govbb-btn govbb-btn--secondary" type="button" id="geoBtn" onclick="locateMe()">Use my location</button>
+          </div>
+
+          <div class="jp-radius-group" id="jp-radius-group" role="group" aria-labelledby="radius-legend">
+            <p class="jp-radius-group__legend" id="radius-legend">Show JPs within</p>
+            <div class="jp-radius-pills">
+              <button class="jp-radius-pill jp-radius-pill--active" type="button" data-mi="5" onclick="setRadius(5)">5 miles</button>
+              <button class="jp-radius-pill" type="button" data-mi="10" onclick="setRadius(10)">10 miles</button>
+              <button class="jp-radius-pill" type="button" data-mi="0" onclick="setRadius(0)">Island-wide</button>
+            </div>
+          </div>
+
+        </section>
+
+        <div class="jp-layout">
+
+          <div class="jp-layout__list" id="resultsArea" aria-live="polite" aria-atomic="true"></div>
+
+          <aside class="jp-layout__map" aria-label="Map of Justices of the Peace">
+            <p class="jp-map-hint" id="jp-map-hint">Tap a parish name on the map to zoom in and see JPs in that area.</p>
+            <div id="jp-map" role="application" aria-label="Map of Barbados. Click a parish name to filter results."></div>
+            <p class="jp-map-disclaimer">
+              <strong>About these pins:</strong> the official Supreme Court register lists each JP's parish and address as text only — it does not include map coordinates. The pin positions on this map are <strong>approximate</strong>: each JP is placed inside their parish but not at their exact street address. The list shows each JP's <strong>home address</strong> by default; if only a work address is on the register, the row is tagged <em>"Work address"</em>.
+            </p>
+          </aside>
+
         </div>
+
+        <div class="service__feedback">
+          <h3 class="govbb-text-h3">Was this helpful?</h3>
+          <p class="govbb-text-body">Give us your feedback about this page.</p>
+          <a class="govbb-link govbb-link--secondary govbb-font-body" href="/feedback"
+            >Help us improve alpha.gov.bb</a
+          >
+        </div>
+
       </div>
     </main>
 
@@ -2451,12 +2284,10 @@
     var markerLayer  = null;
     var markerMap    = {};
     var locationMarker = null;
-    var pickedMarker   = null;
     var selectedParish = '';
     var currentResults = [];
     var pickedLocation = null;
-    var pickMode       = false;
-    var debounceTimer  = null;
+    var focusedJpId    = null;     /* when set, only this JP shows on the map */
     var searchRadius      = 5;     /* miles; 0 = island-wide */
     var MILES_TO_KM       = 1.60934;
     var PAGE_SIZE         = 20;
@@ -2481,6 +2312,17 @@
 
     function esc(s) {
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    /* Prefer the JP's home (residential) address over the business address.
+       The business address often sits in a different parish, which confuses
+       users searching by their own parish. Fall back to business only when
+       home is empty, and tag it as "(work address)" so it's not mistaken
+       for a home location. */
+    function jpAddress(jp) {
+      var area = (jp.area || '').trim();
+      if (area) return { text: area, isWork: false };
+      return { text: (jp.business || '').trim(), isWork: true };
     }
 
     function haversine(lat1, lng1, lat2, lng2) {
@@ -2534,37 +2376,35 @@
             ' <span style="color:var(--color-mid-grey-00);font-weight:normal">(' + remaining + ' remaining)</span>' +
           '</button>'
         : '';
-      var cards = page.map(function(jp) {
+      var rows = page.map(function(jp) {
         var distKm = (pickedLocation && jp.lat && jp.lng)
           ? haversine(pickedLocation.lat, pickedLocation.lng, jp.lat, jp.lng) : null;
         var distLabel = distKm !== null
           ? (distKm < 1 ? Math.round(distKm * 1000) + ' m' : distKm.toFixed(1) + ' km') : '';
-        var distBadge = distLabel ? '<span class="jp-card__dist">' + esc(distLabel) + '</span>' : '';
-        return '<li class="jp-card" data-jp-id="' + jp.id + '" onclick="panToMarker(' + jp.id + ')" style="cursor:pointer" role="button" tabindex="0" aria-label="' + esc(jp.name) + ', ' + esc(jp.parish) + (distLabel ? ', ' + distLabel + ' away' : '') + '">' +
-          '<div class="jp-card__top">' +
-            '<h3 class="govbb-text-h3 jp-card__name" style="margin:0">' + esc(jp.name) + '</h3>' +
-            distBadge +
-          '</div>' +
-          '<span class="jp-card__parish-chip">' + esc(jp.parish) + '</span>' +
-          '<p class="jp-card__address">' + esc(jp.business) + '</p>' +
-          (jpMap ? '<p class="jp-card__map-hint">Tap to show on map</p>' : '') +
+        var distBadge = distLabel ? '<span class="jp-list__dist">' + esc(distLabel) + '</span>' : '';
+        var focused = (focusedJpId === jp.id);
+        var addr = jpAddress(jp);
+        var addrTag = addr.isWork
+          ? '<span class="jp-list__addr-tag">Work address</span> '
+          : '';
+        return '<li class="jp-list__item' + (focused ? ' jp-list__item--highlight' : '') + '" data-jp-id="' + jp.id + '" onclick="toggleFocus(' + jp.id + ')" role="button" tabindex="0" aria-pressed="' + (focused ? 'true' : 'false') + '" aria-label="' + esc(jp.name) + ', ' + esc(jp.parish) + (distLabel ? ', ' + distLabel + ' away' : '') + '">' +
+          '<h3 class="jp-list__name">' + esc(jp.name) + '</h3>' +
+          distBadge +
+          '<span class="jp-list__parish">' + esc(jp.parish) + '</span>' +
+          '<p class="jp-list__address">' + addrTag + esc(addr.text) + '</p>' +
         '</li>';
       }).join('');
-      el.innerHTML = '<div class="jp-results">' +
-        '<div class="jp-results__header">' +
+      el.innerHTML = '<div class="jp-results-meta">' +
           '<p class="govbb-text-body"><strong>' + esc(countLabel) + '</strong></p>' +
           '<button class="jp-clear" type="button" onclick="clearSearch()">Clear</button>' +
         '</div>' +
-        '<ul class="jp-card-list" aria-label="JP search results">' + cards + '</ul>' +
-        showMoreBtn +
-        '<div class="jp-tip" style="margin-top:var(--spacing-s)"><p class="govbb-text-body"><strong>You may already know one of these people.</strong> ' +
-        'JPs give their time for free. If you know someone on this list, you can go to them directly.</p></div>' +
-      '</div>';
-      el.querySelectorAll('.jp-card').forEach(function(card) {
-        card.addEventListener('keydown', function(e) {
+        '<ul class="jp-list" aria-label="JP search results">' + rows + '</ul>' +
+        showMoreBtn;
+      el.querySelectorAll('.jp-list__item').forEach(function(row) {
+        row.addEventListener('keydown', function(e) {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            panToMarker(parseInt(card.getAttribute('data-jp-id'), 10));
+            toggleFocus(parseInt(row.getAttribute('data-jp-id'), 10));
           }
         });
       });
@@ -2575,15 +2415,15 @@
       var parish = document.getElementById('parish').value;
       var contextLabel = locationSetByParish ? parish : pickedLocation ? 'your location' : null;
       renderResults(contextLabel);
-      /* Scroll to first new card */
-      var cards = document.querySelectorAll('.jp-card');
-      var firstNew = cards[displayCount - PAGE_SIZE];
+      var rows = document.querySelectorAll('.jp-list__item');
+      var firstNew = rows[displayCount - PAGE_SIZE];
       if (firstNew) firstNew.scrollIntoView({behavior: 'smooth', block: 'start'});
     };
 
     function runSearch() {
       var parish = document.getElementById('parish').value;
-      var area   = document.getElementById('jp-area').value.toLowerCase().trim();
+      /* Changing filters always drops any single-JP focus */
+      focusedJpId = null;
 
       /* Always sync the active parish label on the map */
       document.querySelectorAll('.jp-parish-label').forEach(function(b) {
@@ -2606,19 +2446,11 @@
         if (jpMap && radiusCircle) { jpMap.removeLayer(radiusCircle); radiusCircle = null; }
         document.getElementById('jp-radius-group').classList.remove('jp-radius-group--visible');
         if (jpMap) jpMap.setView([13.18, -59.555], 11);
-        setHint('Select a parish or use your location to find a JP near you.');
+        setHint('Pick a parish or use your location to narrow the list.');
       }
 
-      /* Nothing to search on */
-      if (!area && !pickedLocation) {
-        document.getElementById('resultsArea').innerHTML = '';
-        return;
-      }
-
-      /* Text filter (across all JPs — radius handles geography) */
-      currentResults = area
-        ? JPS.filter(function(jp) { return matchesArea(jp, area); })
-        : JPS.slice();
+      /* Start from the full list — radius below narrows by geography */
+      currentResults = JPS.slice();
 
       /* Radius filter + distance sort when a location pin is set */
       if (pickedLocation) {
@@ -2652,6 +2484,7 @@
       displayCount = PAGE_SIZE;
       var contextLabel = locationSetByParish ? parish : pickedLocation ? 'your location' : null;
       renderResults(contextLabel);
+      if (jpMap) updateMarkers(currentResults);
     }
 
     window.setRadius = function(mi) {
@@ -2660,70 +2493,79 @@
         btn.classList.toggle('jp-radius-pill--active', parseInt(btn.getAttribute('data-mi'), 10) === mi);
       });
       var label = mi > 0 ? mi + ' miles' : 'the whole island';
-      setHint('Showing JPs within ' + label + ' of your pin. Click the map to move your pin.');
+      setHint('Showing JPs within ' + label + '. Pick another parish or run "Use my location" again to change your search.');
       if (pickedLocation) runSearch();
     };
 
     function clearSearch() {
-      selectedParish = ''; currentResults = [];
-      pickedLocation = null; pickMode = false;
+      selectedParish = '';
+      pickedLocation = null;
+      focusedJpId   = null;
       searchRadius = 5; locationSetByParish = false; displayCount = PAGE_SIZE;
       document.getElementById('parish').value = '';
-      document.getElementById('jp-area').value = '';
-      document.getElementById('resultsArea').innerHTML = '';
-      document.getElementById('pickBtn').textContent = 'Pick on map';
-      document.getElementById('jp-map').classList.remove('jp-map--pick-mode');
+      currentResults = JPS.slice();
+      renderResults(null);
       document.getElementById('jp-radius-group').classList.remove('jp-radius-group--visible');
-      /* Reset active radius pill to 5 miles */
       document.querySelectorAll('.jp-radius-pill').forEach(function(btn) {
         btn.classList.toggle('jp-radius-pill--active', parseInt(btn.getAttribute('data-mi'), 10) === 5);
       });
       document.querySelectorAll('.jp-parish-label').forEach(function(b) { b.classList.remove('jp-parish-label--active'); });
       if (jpMap) {
-        if (pickedMarker)   { jpMap.removeLayer(pickedMarker);   pickedMarker   = null; }
         if (locationMarker) { jpMap.removeLayer(locationMarker); locationMarker = null; }
         if (radiusCircle)   { jpMap.removeLayer(radiusCircle);   radiusCircle   = null; }
-        if (markerLayer) markerLayer.clearLayers();
-        markerMap = {};
+        updateMarkers(JPS);
         jpMap.setView([13.18,-59.555], 11);
       }
-      setHint('Select a parish or use your location to find a JP near you.');
+      setHint('Every JP icon you see is a Justice of the Peace. Pick a parish or use your location to narrow the list.');
     }
 
     /* Expose to onclick attributes */
     window.runSearch   = runSearch;
     window.clearSearch = clearSearch;
 
-    window.scrollToCard = function(id) {
-      var c = document.querySelector('[data-jp-id="' + id + '"]');
-      if (!c) return;
-      c.scrollIntoView({behavior:'smooth', block:'center'});
-      c.classList.add('jp-card--highlight');
-      setTimeout(function() { c.classList.remove('jp-card--highlight'); }, 2000);
-    };
-
-    window.panToMarker = function(id) {
-      if (!jpMap) return;
-      var jp = JPS[id];
-      if (!jp || !jp.lat || !jp.lng) return;
-      jpMap.setView([jp.lat, jp.lng], 14, {animate: true});
-      document.getElementById('jp-map').scrollIntoView({behavior:'smooth', block:'nearest'});
-    };
-
-    window.togglePickMode = function() {
-      if (!jpMap) return;
-      pickMode = !pickMode;
-      var btn   = document.getElementById('pickBtn');
-      var mapEl = document.getElementById('jp-map');
-      if (pickMode) {
-        btn.textContent = 'Cancel';
-        mapEl.classList.add('jp-map--pick-mode');
-        setHint('Click anywhere on the map to drop a pin and find JPs near that spot.');
-      } else {
-        btn.textContent = 'Pick on map';
-        mapEl.classList.remove('jp-map--pick-mode');
+    /* Click a name in the list (or a popup's "Show in list" button) to focus
+       that JP. The map hides every other pin and zooms to the chosen one.
+       Click again to clear focus and bring every pin back. */
+    window.toggleFocus = function(id) {
+      var same = (focusedJpId === id);
+      document.querySelectorAll('.jp-list__item--highlight').forEach(function(el) {
+        el.classList.remove('jp-list__item--highlight');
+        el.setAttribute('aria-pressed', 'false');
+      });
+      if (same) {
+        focusedJpId = null;
+        if (jpMap) {
+          updateMarkers(currentResults);
+          if (radiusCircle) {
+            jpMap.fitBounds(radiusCircle.getBounds(), {padding:[20,20]});
+          } else if (selectedParish && PARISH_BOUNDS[selectedParish]) {
+            jpMap.fitBounds(PARISH_BOUNDS[selectedParish], {padding:[30,30]});
+          } else {
+            jpMap.setView([13.18, -59.555], 11);
+          }
+        }
+        return;
+      }
+      focusedJpId = id;
+      var row = document.querySelector('[data-jp-id="' + id + '"]');
+      if (row) {
+        row.classList.add('jp-list__item--highlight');
+        row.setAttribute('aria-pressed', 'true');
+        row.scrollIntoView({behavior: 'smooth', block: 'center'});
+      }
+      if (jpMap) {
+        var jp = JPS[id];
+        if (jp && jp.lat && jp.lng) {
+          updateMarkers([jp]);
+          jpMap.setView([jp.lat, jp.lng], 15, {animate: true});
+          var marker = markerMap[jp.id];
+          if (marker) marker.openPopup();
+        }
       }
     };
+
+    /* Kept for backward-compatibility — popup button calls this. */
+    window.scrollToCard = function(id) { toggleFocus(id); };
 
     window.locateMe = function() {
       var btn = document.getElementById('geoBtn');
@@ -2738,7 +2580,6 @@
           pickedLocation = {lat: lat, lng: lng};
           locationSetByParish = false;
           if (jpMap) {
-            if (pickedMarker)   { jpMap.removeLayer(pickedMarker);   pickedMarker   = null; }
             if (locationMarker) { jpMap.removeLayer(locationMarker); }
             locationMarker = L.circleMarker([lat, lng], {
               radius:9, fillColor:'#1d70b8', color:'#fff', weight:2.5, fillOpacity:1
@@ -2753,7 +2594,7 @@
           });
           document.getElementById('jp-radius-group').classList.add('jp-radius-group--visible');
           var label = searchRadius > 0 ? searchRadius + ' miles' : 'the whole island';
-          setHint('Showing JPs within ' + label + '. Click the map to move your pin.');
+          setHint('Showing JPs within ' + label + ' of your location.');
           runSearch();
         },
         function() {
@@ -2766,6 +2607,15 @@
     };
 
     /* ── Map-only functions (only called when jpMap exists) ───────────── */
+    function jpIcon() {
+      return L.divIcon({
+        className: '',
+        html: '<div class="jp-marker" aria-hidden="true">JP</div>',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+        popupAnchor: [0, -14]
+      });
+    }
     function updateMarkers(list) {
       if (!markerLayer) return;
       markerLayer.clearLayers();
@@ -2773,15 +2623,15 @@
       var showDetails = list.length > 0;
       list.forEach(function(jp) {
         if (!jp.lat || !jp.lng) return;
-        var m = L.circleMarker([jp.lat, jp.lng], {
-          radius:10, fillColor:'#0F6E56', color:'#fff', weight:2.5, fillOpacity:0.92
-        });
+        var m = L.marker([jp.lat, jp.lng], { icon: jpIcon(), title: jp.name });
+        var pAddr = jpAddress(jp);
+        var pTag  = pAddr.isWork ? '<em style="color:#666">Work address.</em> ' : '';
         m.bindPopup(
           '<strong style="font-size:13px;display:block;margin-bottom:3px">' + esc(jp.name) + '</strong>' +
           '<span style="font-size:12px;color:#555;display:block">' + esc(jp.parish) + '</span>' +
-          '<span style="font-size:12px;display:block;margin:2px 0 6px">' + esc(jp.business) + '</span>' +
+          '<span style="font-size:12px;display:block;margin:2px 0 6px">' + pTag + esc(pAddr.text) + '</span>' +
           (showDetails
-            ? '<button onclick="scrollToCard(' + jp.id + ')" style="background:#0F6E56;color:#fff;border:none;padding:6px 12px;font-size:12px;cursor:pointer;border-radius:2px;width:100%">See full details below</button>'
+            ? '<button onclick="scrollToCard(' + jp.id + ')" style="background:#0F6E56;color:#fff;border:none;padding:6px 12px;font-size:12px;cursor:pointer;border-radius:2px;width:100%">Show in list</button>'
             : '')
         );
         markerLayer.addLayer(m);
@@ -2790,25 +2640,58 @@
     }
 
     /* ── Leaflet initialisation ──────────────────────────────────────── */
+    /* Keep the map locked onto Barbados — can't pan or zoom away from the island. */
+    var BARBADOS_BOUNDS = L.latLngBounds([12.99, -59.72], [13.36, -59.40]);
     function initMap() {
       jpMap = L.map('jp-map', {
         center: [13.18, -59.555], zoom: 11,
+        minZoom: 10, maxZoom: 16,
+        maxBounds: BARBADOS_BOUNDS,
+        maxBoundsViscosity: 1.0,
         scrollWheelZoom: true, touchZoom: true, doubleClickZoom: true
       });
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      /* CARTO Voyager tiles — OSM-based but with cleaner road and place labels
+         than the raw OpenStreetMap raster. Free, no API key required.
+         Falls back automatically to OSM if Carto is unreachable. */
+      var cartoTiles = L.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+        {
+          subdomains: 'abcd',
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          minZoom: 10, maxZoom: 16,
+          bounds: BARBADOS_BOUNDS
+        }
+      );
+      cartoTiles.on('tileerror', function() {
+        if (!jpMap.hasLayer(osmTiles)) osmTiles.addTo(jpMap);
+      });
+      var osmTiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 18
-      }).addTo(jpMap);
+        minZoom: 10, maxZoom: 16,
+        bounds: BARBADOS_BOUNDS
+      });
+      cartoTiles.addTo(jpMap);
       markerLayer = L.layerGroup().addTo(jpMap);
 
-      /* Parish pill labels */
-      Object.keys(PARISH_CENTRES).forEach(function(p) {
-        L.marker(PARISH_CENTRES[p], {
-          interactive: false,
+      /* Dedicated pane so parish buttons always sit above JP icons */
+      jpMap.createPane('parishLabels');
+      jpMap.getPane('parishLabels').style.zIndex = 650;
+      jpMap.getPane('parishLabels').style.pointerEvents = 'auto';
+
+      /* Parish pill labels — placed near the top edge of each parish, away
+         from the typical JP cluster which sits closer to the centre. */
+      Object.keys(PARISH_BOUNDS).forEach(function(p) {
+        var b = PARISH_BOUNDS[p];           // [[minLat,minLng],[maxLat,maxLng]]
+        var labelLat = b[1][0] - (b[1][0] - b[0][0]) * 0.18;
+        var labelLng = (b[0][1] + b[1][1]) / 2;
+        L.marker([labelLat, labelLng], {
+          pane: 'parishLabels',
+          interactive: true,
           icon: L.divIcon({
             className: '',
-            html: '<button class="jp-parish-label" data-parish="' + p + '">' + p + '</button>',
-            iconAnchor: [40, 10]
+            html: '<button type="button" class="jp-parish-label" data-parish="' + p + '">' + p + '</button>',
+            iconSize: null,
+            iconAnchor: [0, 0]
           })
         }).addTo(jpMap);
       });
@@ -2825,49 +2708,19 @@
         });
         jpMap.fitBounds(PARISH_BOUNDS[name], {padding:[30,30]});
         runSearch();
-        setHint('Tap a green dot to jump to that JP\'s details. Pinch or scroll to zoom further in.');
+        setHint('Tap a JP icon to see who they are, or pick a name from the list.');
       });
 
-      /* Any map click drops a pin and searches by radius */
-      jpMap.on('click', function(e) {
-        pickedLocation = {lat: e.latlng.lat, lng: e.latlng.lng};
-        locationSetByParish = false;
-        if (pickedMarker) jpMap.removeLayer(pickedMarker);
-        pickedMarker = L.marker(e.latlng, {
-          icon: L.divIcon({
-            className: '',
-            html: '<div style="width:18px;height:18px;background:#e8550a;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>',
-            iconAnchor: [9, 9]
-          })
-        }).bindPopup('Your chosen location').addTo(jpMap);
-        /* Exit pick mode if active */
-        if (pickMode) { pickMode = false; document.getElementById('jp-map').classList.remove('jp-map--pick-mode'); document.getElementById('pickBtn').textContent = 'Pick on map'; }
-        /* Clear parish filter; show radius picker */
-        document.getElementById('parish').value = '';
-        document.querySelectorAll('.jp-parish-label').forEach(function(b) { b.classList.remove('jp-parish-label--active'); });
-        document.getElementById('jp-radius-group').classList.add('jp-radius-group--visible');
-        var label = searchRadius > 0 ? searchRadius + ' miles' : 'the whole island';
-        setHint('Showing JPs within ' + label + '. Click anywhere on the map to move your pin.');
-        runSearch();
-      });
-
-      /* Start with no markers — dots appear only after a search */
-      updateMarkers([]);
-      setHint('Select a parish or use your location to find a JP near you.');
+      /* Show every JP as an icon on first load — list narrows as the user filters. */
+      updateMarkers(JPS);
+      setHint('Every JP icon you see is a Justice of the Peace. Pick a parish or use your location to narrow the list.');
     }
 
-    /* ── Wire up live search after DOM is ready ──────────────────────── */
+    /* ── Initial state ──────────────────────────────────────────────── */
     document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('jp-area').addEventListener('input', function() {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(function() {
-          var area = document.getElementById('jp-area').value.trim();
-          if (area.length >= 2 || document.getElementById('parish').value) runSearch();
-        }, 300);
-      });
-      document.getElementById('jp-area').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') { e.preventDefault(); runSearch(); }
-      });
+      currentResults = JPS.slice();
+      displayCount = PAGE_SIZE;
+      renderResults(null);
     });
     </script>
 
