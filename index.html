@@ -6,17 +6,7 @@
     <title>Justice of the Peace - The Government of Barbados</title>
     <link rel="stylesheet" href="https://unpkg.com/@govtech-bb/styles@1.0.0-alpha.16/dist/styles.css" />
     <style>
-      /* ─── Accessible do/don't colours ──────────────────────────────
-         The design system's bright teal (#30c0c8) and red (#ff6b6b)
-         only reach about 2.2:1 and 2.8:1 against white — below the
-         WCAG 1.4.11 threshold of 3:1 for graphical UI elements.
-         Darker shades below clear 6:1, and ✓/✗ glyphs make the
-         distinction work without colour at all. */
-      :root {
-        --jp-do-color:    #0B6B6F;  /* dark teal — ~6.4:1 on white */
-        --jp-dont-color:  #B23A3A;  /* dark red  — ~5.9:1 on white */
-      }
-
+      /* Lean GDS-style page — vertical flow, no panels, design system primitives. */
       .service-page {
         padding-block: var(--spacing-l);
         display: flex;
@@ -28,12 +18,8 @@
         flex-direction: column;
         gap: var(--spacing-xs);
         padding-bottom: var(--spacing-s);
-        border-bottom: 4px solid var(--color-blue-10);
       }
-      .service-page__heading h1 {
-        margin: 0;
-        white-space: nowrap;
-      }
+      .service-page__heading h1 { margin: 0; }
       .service-page__lede {
         font-size: var(--font-size-h3);
         color: var(--color-dark-grey-00);
@@ -55,25 +41,30 @@
       }
       .jp-skip-link:focus { left: 0; }
 
-      /* When a user follows the #sources anchor, briefly highlight the
-         section so they confirm they've arrived. */
-      :target { outline: 4px solid var(--color-yellow-100); outline-offset: var(--spacing-xs); }
-
-      /* Single-column body. Wider reading width on desktop is fine since
-         long-form copy with no sidebar is still ~70ch at typical widths. */
-      .service__grid { display: block; }
       .service__column {
         display: flex;
         flex-direction: column;
         gap: var(--spacing-l);
         min-width: 0;
       }
-
       .service__section {
         display: flex;
         flex-direction: column;
         gap: var(--spacing-s);
       }
+      .service__section h2 { margin: 0; }
+      .service__section .govbb-btn { align-self: flex-start; }
+      /* "How to" numbered list — each step needs its own breathing room
+         since steps contain a sub-heading, paragraph(s) and sometimes a button. */
+      .jp-how-to > li {
+        margin-bottom: var(--spacing-m);
+      }
+      .jp-how-to > li:last-child { margin-bottom: 0; }
+      .jp-how-to h4 {
+        margin: 0 0 var(--spacing-xs);
+      }
+      .jp-how-to p { margin: 0 0 var(--spacing-xs); }
+      .jp-how-to p:last-child { margin-bottom: 0; }
       .service__feedback {
         display: flex;
         flex-direction: column;
@@ -82,98 +73,6 @@
         border: 4px solid var(--color-yellow-100);
         background: var(--color-yellow-40);
         padding: var(--spacing-xm) var(--spacing-s);
-      }
-
-      .jp-callout {
-        border-left: 4px solid var(--color-blue-40);
-        background: var(--color-grey-00);
-        padding: var(--spacing-s) var(--spacing-m);
-      }
-      .jp-callout p { margin: 0; }
-
-      /* Do/Don't panels share the same shape so the two sections read
-         consistently — only the left-border colour differs. */
-      .jp-do,
-      .jp-cant {
-        padding: var(--spacing-m);
-        background: var(--color-grey-00);
-      }
-      .jp-do  { border-left: 4px solid var(--jp-do-color); }
-      .jp-cant { border-left: 4px solid var(--jp-dont-color); }
-      .jp-cant ul {
-        margin: 0;
-        padding-left: 1.25em;
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-m);
-      }
-      .jp-cant li {
-        padding: 0;
-        line-height: var(--line-height-body);
-      }
-      /* "Do" list — title on its own line, description below; each pair
-         spaced out so the eye can scan tasks at a glance. */
-      .jp-do dl {
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-m);
-      }
-      .jp-do dt {
-        font-weight: var(--font-weight-bold);
-        font-size: var(--font-size-body);
-        color: var(--color-dark-grey-00);
-        margin-bottom: 2px;
-      }
-      .jp-do dd {
-        margin: 0;
-        font-size: var(--font-size-body-small);
-        line-height: var(--line-height-body);
-        color: var(--color-dark-grey-00);
-      }
-
-      /* CTA — grey block with a thick green left border, matching the
-         original treatment. */
-      .jp-cta {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-s);
-        padding: var(--spacing-m);
-        border-left: 4px solid var(--color-green-00);
-        background: var(--color-grey-00);
-      }
-      .jp-cta h2 { margin: 0; }
-      .jp-cta p  { margin: 0; }
-      .jp-cta .govbb-btn { align-self: flex-start; }
-
-      .jp-contact-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-      .jp-contact-list li {
-        padding: var(--spacing-s) 0;
-        border-bottom: 1px solid var(--color-light-grey-20);
-        line-height: var(--line-height-body);
-      }
-      .jp-contact-list li:last-child { border-bottom: none; }
-      .jp-contact-list strong {
-        display: block;
-        font-size: var(--font-size-h4);
-        margin-bottom: 2px;
-      }
-      .jp-contact-list a { white-space: nowrap; }
-
-      .jp-source {
-        font-size: var(--font-size-body-small);
-        color: var(--color-mid-grey-00);
-        border-top: 1px solid var(--color-light-grey-20);
-        padding-top: var(--spacing-s);
-        line-height: var(--line-height-body);
-      }
-
-      @media (max-width: 900px) {
-        .service-page__heading h1 { white-space: normal; }
       }
     </style>
   </head>
@@ -239,196 +138,105 @@
         </nav>
 
         <header class="service-page__heading">
+          <p class="govbb-text-caption">Last updated on May 22nd, 2026</p>
           <h1 class="govbb-text-h1">Justice of the Peace</h1>
-          <p class="service-page__lede">A Justice of the Peace (JP) can help you with official documents. Find out what a JP does and how to find one near you.</p>
+          <p class="service-page__lede">A Justice of the Peace (JP) is appointed by the President of Barbados to help people with official documents — certifying copies, witnessing signatures, and taking sworn statements and affidavits. JPs are ordinary community members and their help is <strong>free of charge</strong>. They are not allowed to charge you.</p>
         </header>
 
-        <div class="service__grid">
+        <div class="service__column">
 
-          <div class="service__column">
-
-            <!-- Who is a JP -->
-            <section class="service__section">
-              <h2 class="govbb-text-h2">Who is a Justice of the Peace?</h2>
-              <p class="govbb-text-body">
-                A Justice of the Peace (JP) is someone appointed by the President of Barbados to help people with official documents.
-              </p>
-              <p class="govbb-text-body">
-                JPs are ordinary people from your community — teachers, nurses, farmers, accountants, church leaders. When they are chosen, their parish and job are recorded so you can find them.
-              </p>
-              <div class="jp-callout">
-                <p class="govbb-text-body">JPs do this job for free. They are <strong>not allowed to charge you</strong>. If you already know a JP — a neighbour, a teacher, a church elder, someone you work with — you can just go to them.</p>
-              </div>
-            </section>
-
-            <!-- What a JP can help with -->
-            <section class="service__section">
-              <h2 class="govbb-text-h2">What can a JP help you with?</h2>
-              <p class="govbb-text-body">Most people visit a JP for one of three reasons. All three are free.</p>
-              <div class="jp-do">
-                <dl>
-                  <div>
-                    <dt>Certify a copy of a document</dt>
-                    <dd>A JP looks at your original document and a copy of it, then signs the copy to confirm it matches. You need this for things like passport applications, school enrolments and overseas job applications.</dd>
-                  </div>
-                  <div>
-                    <dt>Sworn statements and affidavits</dt>
-                    <dd>If you need to put something in writing and swear it is true — a statutory declaration, an affidavit for a court matter, or a sworn statement for a bank or government office — a JP can watch you sign it, take your oath, and sign the document to confirm everything was done properly.</dd>
-                  </div>
-                  <div>
-                    <dt>Witness a signature on legal papers</dt>
-                    <dd>For documents that need an independent person to confirm you signed in their presence — like consent forms or simple agreements — a JP can be that witness.</dd>
-                  </div>
-                </dl>
-              </div>
-          </section>
-
-            <!-- What a JP cannot do -->
-            <section class="service__section">
-              <h2 class="govbb-text-h2">What a JP cannot do</h2>
-              <p class="govbb-text-body">A JP is not a lawyer and cannot give you legal advice. A JP cannot:</p>
-            <div class="jp-cant">
-              <ul>
-                <li>Give you legal advice or speak for you in court</li>
-                <li>Tell you if a document is legally correct</li>
-                <li>Check a copy without seeing the original document</li>
-                <li>Sign a document they have a personal stake in</li>
-                <li>Charge you money for their help</li>
-                <li>Stamp documents that are going to be used in another country — for that you need a <strong>notary public</strong>, who is a lawyer or chartered accountant the Government has given extra powers to certify documents for overseas use</li>
-              </ul>
-            </div>
-            <div class="jp-callout">
-              <p class="govbb-text-body">
-                Need a lawyer? You can find one through the <a class="govbb-link" href="https://www.barbadosbarassociation.com/" target="_blank" rel="noopener noreferrer">Barbados Bar Association</a> or by calling <a class="govbb-link" href="tel:+12465377316">(246) 537-7316</a>.
-              </p>
-            </div>
-          </section>
-
-          <!-- What a notary is -->
           <section class="service__section">
-            <h2 class="govbb-text-h2">What is a notary public?</h2>
-            <p class="govbb-text-body">
-              A notary public is not the same as a JP. A notary is a lawyer or chartered accountant who has been given extra powers by the Government. They can sign and stamp documents that need to be used outside Barbados.
-            </p>
-            <p class="govbb-text-body">
-              You will need a notary, not a JP, if you are doing things like:
-            </p>
+            <h2 class="govbb-text-h2">What a JP can do</h2>
             <ul class="govbb-list govbb-list--bullet">
-              <li>sending a document to a bank, school or office in another country</li>
-              <li>buying or selling land overseas</li>
-              <li>getting a document ready for an apostille from the Supreme Court (the special overseas stamp)</li>
+              <li>Certify a copy of a document, like a passport, birth certificate or driving licence</li>
+              <li>Witness sworn statements and affidavits</li>
+              <li>Witness your signature on legal papers, like consent forms</li>
+            </ul>
+          </section>
+
+          <section class="service__section">
+            <h2 class="govbb-text-h2">What a JP cannot do</h2>
+            <ul class="govbb-list govbb-list--bullet">
+              <li>Give legal advice or speak for you in court</li>
+              <li>Certify a copy without seeing the original document</li>
+              <li>Sign a document they have a personal interest in</li>
+              <li>Charge you any money</li>
+              <li>Stamp documents for use in another country — you need a notary public for that (see below)</li>
+            </ul>
+          </section>
+
+          <section class="service__section">
+            <h2 class="govbb-text-h2">If you need a notary public</h2>
+            <p class="govbb-text-body">
+              A notary public is a lawyer or chartered accountant with extra powers from the Government to certify documents for use outside Barbados. A JP cannot do this work — you need a notary.
+            </p>
+            <p class="govbb-text-body">
+              For the official process, fees, and where to go, see <a class="govbb-link" href="https://alpha.gov.bb/travel-id-citizenship/get-a-document-notarised">Get a document notarised</a>.
+            </p>
+          </section>
+
+          <section class="service__section">
+            <h2 class="govbb-text-h2">What to bring</h2>
+            <ul class="govbb-list govbb-list--bullet">
+              <li>The original document and the copy you want certified — the JP needs to see both</li>
+              <li>A photo ID (passport, national ID card or driving licence)</li>
+              <li>Any other documents the organisation has asked for</li>
             </ul>
             <p class="govbb-text-body">
-              A notary will charge you a fee. Since September 2024, lawyers and chartered accountants with 15 or more years of experience can register as notaries. Your own lawyer or accountant may already be one — just ask them.
+              If you are signing something in front of the JP, do not sign it before you arrive.
             </p>
           </section>
 
-          <!-- What to bring -->
           <section class="service__section">
-            <h2 class="govbb-text-h2">What to bring when you visit a JP</h2>
-            <ul class="govbb-list govbb-list--bullet">
-              <li>the original document and the copy you want certified — the JP needs to see both</li>
-              <li>a photo ID (passport, national ID card or driving licence)</li>
-              <li>any other documents the organisation asking you has requested</li>
-            </ul>
-            <p class="govbb-text-body">
-              If you are signing something in front of the JP — an affidavit, a sworn statement or a witnessed form — <strong>do not sign it before you arrive</strong>. You must sign in front of them.
-            </p>
-            <div class="jp-callout">
-              <p class="govbb-text-body">
-                <strong>Tip:</strong> Phone the JP before you go. Some JPs work from home and may not be there during the day. Others prefer you visit them at their workplace.
-              </p>
-            </div>
-          </section>
-
-          <!-- Primary CTA — placed after the can/cannot/notary/bring sections
-               so users have qualified themselves (JP vs notary, what to bring)
-               before they commit to the search. -->
-          <section class="service__section">
-            <div class="jp-cta">
-              <h2 class="govbb-text-h2">Find a JP near you</h2>
-              <p class="govbb-text-body">Search the official list by parish or use your location.</p>
-              <a class="govbb-btn" href="find-a-jp.html">Find a JP</a>
-            </div>
-          </section>
-
-          <!-- How JPs are picked -->
-          <section class="service__section">
-            <h2 class="govbb-text-h2">How JPs are picked in Barbados</h2>
-            <p class="govbb-text-body">JPs are appointed by the President of Barbados on the advice of the Cabinet. The steps are:</p>
-            <ol class="govbb-list govbb-list--number">
-              <li>The Cabinet of Barbados decides who to put forward as a JP.</li>
-              <li>The President of Barbados officially appoints them.</li>
-              <li>The appointment is published in the Official Gazette.</li>
-              <li>Each new JP takes an oath at a public ceremony before they can start work.</li>
+            <h2 class="govbb-text-h2">How to find a Justice of the Peace</h2>
+            <ol class="govbb-list govbb-list--number jp-how-to">
+              <li>
+                <h4 class="govbb-text-h4">Search the directory</h4>
+                <p class="govbb-text-body">Look up JPs by parish or use your phone's location. The directory lists every JP on the official register.</p>
+                <a class="govbb-btn" href="find-a-jp.html">Find a JP</a>
+              </li>
+              <li>
+                <h4 class="govbb-text-h4">Get help by phone</h4>
+                <p class="govbb-text-body">We do not show personal contact details for JPs online. If you cannot find one in the directory, contact one of the offices below.</p>
+                <p class="govbb-text-body">
+                  <strong>Office of the Attorney General.</strong> Phone <a class="govbb-link" href="tel:+12464677370">(246) 467-7370</a> or email <a class="govbb-link" href="mailto:agoffice@barbados.gov.bb">agoffice@barbados.gov.bb</a>.
+                </p>
+                <p class="govbb-text-body">
+                  <strong>Barbados Judicial System</strong>, for JP services linked to court matters. Phone <a class="govbb-link" href="tel:+12465359700">(246) 535-9700</a>.
+                </p>
+              </li>
             </ol>
-            <p class="govbb-text-body">
-              Once someone becomes a JP, they stay a JP for life unless they choose to stop or are removed.
-            </p>
-            <p class="govbb-text-body">
-              The list of JPs has grown a lot since 2023 — see <a class="govbb-link" href="#sources">where this information comes from</a> for the exact numbers and dates.
-            </p>
           </section>
 
-          <!-- Contact -->
           <section class="service__section">
-            <h2 class="govbb-text-h2">Need help finding a JP?</h2>
+            <h2 class="govbb-text-h2">If you live overseas</h2>
             <p class="govbb-text-body">
-              We do not show personal contact details for JPs online. To get in touch with one, call one of the offices below.
+              If you are outside Barbados and a document needs to be certified, you can usually use a <strong>notary public</strong> or commissioner of oaths in the country where you are. The certified document will be accepted in most cases.
             </p>
-            <ul class="jp-contact-list">
-              <li>
-                <strong>Office of the Attorney General</strong>
-                Best place to start — they keep the official record.<br>
-                Phone: <a class="govbb-link" href="tel:+12464677370">(246) 467-7370</a><br>
-                Email: <a class="govbb-link" href="mailto:agoffice@barbados.gov.bb">agoffice@barbados.gov.bb</a>
-              </li>
-              <li>
-                <strong>Barbados Judicial System</strong>
-                For JP services linked to court matters.<br>
-                Phone: <a class="govbb-link" href="tel:+12465359700">(246) 535-9700</a><br>
-                Website: <a class="govbb-link" href="https://www.barbadoslawcourts.gov.bb" target="_blank" rel="noopener noreferrer">barbadoslawcourts.gov.bb</a>
-              </li>
-              <li>
-                <strong>Barbados Bar Association</strong>
-                If you need a lawyer or a notary public.<br>
-                Phone: <a class="govbb-link" href="tel:+12465377316">(246) 537-7316</a><br>
-                Website: <a class="govbb-link" href="https://www.barbadosbarassociation.com/" target="_blank" rel="noopener noreferrer">barbadosbarassociation.com</a>
-              </li>
-            </ul>
+            <p class="govbb-text-body">
+              For matters that specifically require a Barbados JP, contact the nearest Barbados High Commission or Consulate, or call the Office of the Attorney General on <a class="govbb-link" href="tel:+12464677370">(246) 467-7370</a> for advice.
+            </p>
           </section>
 
-          <!-- Source -->
           <section class="service__section" id="sources">
             <h2 class="govbb-text-h2">Where this information comes from</h2>
             <p class="govbb-text-body">
-              The list of JPs on the next page is the official register kept by the Supreme Court of Barbados. The Supreme Court last updated the public list on <strong>30 April 2023</strong>.
-            </p>
-            <p class="govbb-text-body">
-              In <strong>2024</strong> the Government appointed <strong>436 new JPs</strong>. You can <a class="govbb-link" href="Justices%20of%20the%20Peace%20appointed%20in%202024.pdf" target="_blank" rel="noopener noreferrer">download the official 2024 list (PDF, 15 pages)</a> for the full names, addresses and parishes.
-            </p>
-            <p class="govbb-text-body">
-              In <strong>January 2026</strong> a further <strong>563 new JPs</strong> were sworn in at a public ceremony. Those names will be added to the public list when the Supreme Court next updates it.
-            </p>
-            <p class="govbb-text-body">
-              Every JP appointment is officially announced in the <strong>Official Gazette of Barbados</strong>, published by the Government Printery. If you want to see the original notice for a JP, search the Gazette for the date of their swearing-in.
-            </p>
-            <p class="jp-source">
-              Sources: Supreme Court of Barbados — Register of Justices of the Peace (30 April 2023); <a class="govbb-link" href="Justices%20of%20the%20Peace%20appointed%20in%202024.pdf" target="_blank" rel="noopener noreferrer">Justices of the Peace appointed in 2024</a> (official list, 436 names); the <a class="govbb-link" href="https://governmentprintery.gov.bb/gazette/" target="_blank" rel="noopener noreferrer">Official Gazette of Barbados</a> (Government Printery) for the original appointment notices; Government of Barbados — public announcement of 563 new JPs (January 2026); Office of the Attorney General. Phone (246) 467-7370 to check whether someone is a JP.
+              The directory uses the Supreme Court of Barbados register (last updated 30 April 2023), the
+              <a class="govbb-link" href="Justices%20of%20the%20Peace%20appointed%20in%202024.pdf" target="_blank" rel="noopener noreferrer">official 2024 list (PDF, 436 names)</a>
+              and the 563 JPs appointed in January 2026. Every appointment is gazetted in the
+              <a class="govbb-link" href="https://governmentprintery.gov.bb/gazette/" target="_blank" rel="noopener noreferrer">Official Gazette of Barbados</a>.
+              To check whether someone is currently a JP, phone the Office of the Attorney General on <a class="govbb-link" href="tel:+12464677370">(246) 467-7370</a>.
             </p>
           </section>
 
-            <div class="service__feedback">
-              <h3 class="govbb-text-h3">Was this helpful?</h3>
-              <p class="govbb-text-body">Give us your feedback about this page.</p>
-              <a class="govbb-link govbb-link--secondary govbb-font-body" href="/feedback"
-                >Help us improve alpha.gov.bb</a
-              >
-            </div>
+          <div class="service__feedback">
+            <h3 class="govbb-text-h3">Was this helpful?</h3>
+            <p class="govbb-text-body">Give us your feedback about this page.</p>
+            <a class="govbb-link govbb-link--secondary govbb-font-body" href="/feedback">Help us improve alpha.gov.bb</a>
+          </div>
 
-          </div><!-- /service__column -->
+        </div><!-- /service__column -->
 
-        </div>
       </div>
     </main>
 
