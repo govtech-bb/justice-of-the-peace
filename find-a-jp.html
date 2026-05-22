@@ -438,7 +438,7 @@
         <header class="jp-page__head">
           <p class="govbb-text-caption">Last updated on May 22nd, 2026</p>
           <h1 class="govbb-text-h1">Find a Justice of the Peace</h1>
-          <p class="govbb-text-body">Search the official directory of Justices of the Peace in Barbados. You can filter by parish or use your location.</p>
+          <p class="govbb-text-body">Search the official directory of Justices of the Peace in Barbados. Filter by parish, or use your location to find JPs nearby.</p>
         </header>
 
         <section class="jp-search-box" aria-label="Filter Justices of the Peace">
@@ -473,7 +473,7 @@
           </div>
 
           <div class="jp-radius-group" id="jp-radius-group" role="group" aria-labelledby="radius-legend">
-            <p class="jp-radius-group__legend" id="radius-legend">Show JPs within</p>
+            <p class="jp-radius-group__legend" id="radius-legend">Show JPs within:</p>
             <div class="jp-radius-pills">
               <button class="jp-radius-pill jp-radius-pill--active" type="button" data-mi="5" onclick="setRadius(5)">5 miles</button>
               <button class="jp-radius-pill" type="button" data-mi="10" onclick="setRadius(10)">10 miles</button>
@@ -506,9 +506,9 @@
             </p>
           </div>
 
-          <aside class="jp-layout__map">
-            <p class="jp-map-hint" id="jp-map-hint">Tap a parish name on the map to zoom in and see JPs in that area.</p>
-            <div id="jp-map" role="region" aria-label="Map of Justices of the Peace across Barbados."></div>
+          <aside class="jp-layout__map" aria-label="Map of Justices of the Peace">
+            <p class="jp-map-hint" id="jp-map-hint">Choose a parish on the map to zoom in and see JPs in that area.</p>
+            <div id="jp-map"></div>
             <p class="jp-disclaimer">
               <strong>About these pins.</strong> The official register lists each JP's parish and address as text — it has no map coordinates. We have looked the addresses up against OpenStreetMap to place each pin, so positions are usually within a few hundred metres of the real address. Where the address is not in OpenStreetMap, the pin shows the nearest known landmark instead. Always confirm using the address shown in the list.
             </p>
@@ -526,7 +526,7 @@
             To check whether someone is currently a JP, phone the Office of the Attorney General on <a class="govbb-link" href="tel:+12464677370">(246) 467-7370</a>.
           </p>
           <p class="govbb-text-body">
-            Looking for a notary public instead? See <a class="govbb-link" href="index.html">Justice of the Peace</a> for the difference, or
+            Looking for a notary public instead? See <a class="govbb-link" href="index.html#notary">Justice of the Peace</a> for the difference, or
             <a class="govbb-link" href="https://alpha.gov.bb/travel-id-citizenship/get-a-document-notarised">Get a document notarised</a> for the official process.
           </p>
         </section>
@@ -3312,7 +3312,7 @@
         });
         jpMap.fitBounds(PARISH_BOUNDS[name], {padding:[30,30]});
         runSearch();
-        setHint('Tap a JP icon to see who they are, or pick a name from the list.');
+        setHint('Choose a JP icon to see who they are, or pick a name from the list.');
       });
 
       /* Safety: in case the initial inline-script render was somehow
