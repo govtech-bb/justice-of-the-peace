@@ -41,34 +41,33 @@
         line-height: 1.4;
       }
 
-      .service__grid {
-        display: grid;
-        grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
-        column-gap: var(--spacing-xl);
-        align-items: start;
+      /* Skip-to-content link — visible only on keyboard focus. */
+      .jp-skip-link {
+        position: absolute;
+        left: -9999px;
+        top: 0;
+        padding: var(--spacing-s) var(--spacing-m);
+        background: var(--color-yellow-100);
+        color: var(--color-dark-grey-00);
+        font-weight: var(--font-weight-bold);
+        text-decoration: none;
+        z-index: 1000;
       }
+      .jp-skip-link:focus { left: 0; }
+
+      /* When a user follows the #sources anchor, briefly highlight the
+         section so they confirm they've arrived. */
+      :target { outline: 4px solid var(--color-yellow-100); outline-offset: var(--spacing-xs); }
+
+      /* Single-column body. Wider reading width on desktop is fine since
+         long-form copy with no sidebar is still ~70ch at typical widths. */
+      .service__grid { display: block; }
       .service__column {
         display: flex;
         flex-direction: column;
         gap: var(--spacing-l);
         min-width: 0;
       }
-      .service__sidebar {
-        position: sticky;
-        top: var(--spacing-m);
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-s);
-        padding: var(--spacing-m);
-        background: var(--color-blue-10);
-        border-left: 4px solid var(--color-dark-blue-00);
-        font-size: var(--font-size-body-small);
-      }
-      .service__sidebar h2 { margin: 0; font-size: var(--font-size-h4); }
-      .service__sidebar p  { margin: 0; }
-      /* Two copies of the same sidebar — one for desktop (right column),
-         one inline between sections 1 and 2 for mobile. Show one at a time. */
-      .service__sidebar--inline { display: none; }
 
       .service__section {
         display: flex;
@@ -92,63 +91,60 @@
       }
       .jp-callout p { margin: 0; }
 
-      .jp-roles {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--spacing-s);
-      }
-      .jp-role {
+      /* Do/Don't panels share the same shape so the two sections read
+         consistently — only the left-border colour differs. */
+      .jp-do,
+      .jp-cant {
         padding: var(--spacing-m);
-        border: 1px solid var(--color-light-grey-20);
-        border-left: 4px solid var(--jp-do-color);
-        background: #fff;
+        background: var(--color-grey-00);
       }
-      .jp-role h3 {
-        margin: 0 0 var(--spacing-xs);
-        font-size: var(--font-size-h4);
+      .jp-do  { border-left: 4px solid var(--jp-do-color); }
+      .jp-cant { border-left: 4px solid var(--jp-dont-color); }
+      .jp-cant ul {
+        margin: 0;
+        padding-left: 1.25em;
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-m);
       }
-      .jp-role p {
+      .jp-cant li {
+        padding: 0;
+        line-height: var(--line-height-body);
+      }
+      /* "Do" list — title on its own line, description below; each pair
+         spaced out so the eye can scan tasks at a glance. */
+      .jp-do dl {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-m);
+      }
+      .jp-do dt {
+        font-weight: var(--font-weight-bold);
+        font-size: var(--font-size-body);
+        color: var(--color-dark-grey-00);
+        margin-bottom: 2px;
+      }
+      .jp-do dd {
         margin: 0;
         font-size: var(--font-size-body-small);
         line-height: var(--line-height-body);
         color: var(--color-dark-grey-00);
       }
 
-      .jp-cant {
+      /* CTA — grey block with a thick green left border, matching the
+         original treatment. */
+      .jp-cta {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-s);
         padding: var(--spacing-m);
-        border-left: 4px solid var(--jp-dont-color);
+        border-left: 4px solid var(--color-green-00);
         background: var(--color-grey-00);
       }
-      .jp-cant ul {
-        margin: 0;
-        padding-left: 1.25em;
-      }
-      .jp-cant li {
-        padding: 2px 0;
-        line-height: var(--line-height-body);
-      }
-
-      .jp-cta-row {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-m);
-        padding: var(--spacing-m);
-        background: var(--color-green-00);
-        color: #fff;
-      }
-      .jp-cta-row h2 { color: #fff; margin: 0; }
-      .jp-cta-row p  { color: #fff; margin: var(--spacing-xs) 0 0; }
-      .jp-cta-row__text { flex: 1; }
-      .jp-cta-row .govbb-btn {
-        background: #fff;
-        color: var(--color-green-00);
-        border: 2px solid #fff;
-        flex-shrink: 0;
-      }
-      .jp-cta-row .govbb-btn:hover {
-        background: transparent;
-        color: #fff;
-      }
+      .jp-cta h2 { margin: 0; }
+      .jp-cta p  { margin: 0; }
+      .jp-cta .govbb-btn { align-self: flex-start; }
 
       .jp-contact-list {
         list-style: none;
@@ -177,16 +173,13 @@
       }
 
       @media (max-width: 900px) {
-        .service__grid { grid-template-columns: 1fr; }
-        .service__sidebar--side   { display: none; }
-        .service__sidebar--inline { display: flex; position: static; }
-        .jp-roles { grid-template-columns: 1fr; }
-        .jp-cta-row { flex-direction: column; align-items: flex-start; }
         .service-page__heading h1 { white-space: normal; }
       }
     </style>
   </head>
   <body class="govbb-page">
+
+    <a class="jp-skip-link" href="#main">Skip to main content</a>
 
     <div>
       <div class="govbb-official-banner">
@@ -217,7 +210,7 @@
       </header>
     </div>
 
-    <main class="govbb-page__main">
+    <main class="govbb-page__main" id="main">
       <div
         class="govbb-status-banner govbb-status-banner--alpha"
         role="status"
@@ -248,7 +241,6 @@
         <header class="service-page__heading">
           <h1 class="govbb-text-h1">Justice of the Peace</h1>
           <p class="service-page__lede">A Justice of the Peace (JP) can help you with official documents. Find out what a JP does and how to find one near you.</p>
-          <p class="govbb-text-caption">Last updated: 21 May 2026</p>
         </header>
 
         <div class="service__grid">
@@ -259,59 +251,36 @@
             <section class="service__section">
               <h2 class="govbb-text-h2">Who is a Justice of the Peace?</h2>
               <p class="govbb-text-body">
-                A Justice of the Peace (JP) is someone appointed by the President of Barbados to help people with official documents. It is a volunteer role — JPs are not paid.
+                A Justice of the Peace (JP) is someone appointed by the President of Barbados to help people with official documents.
               </p>
               <p class="govbb-text-body">
-                JPs are ordinary people from your community. They could be teachers, nurses, farmers, accountants or church leaders. When they are chosen, their parish and job are written down.
-              </p>
-              <p class="govbb-text-body">
-                Once someone becomes a JP, they stay a JP for life unless they choose to stop or are removed. Before they start, they make a promise to serve honestly at an official ceremony.
+                JPs are ordinary people from your community — teachers, nurses, farmers, accountants, church leaders. When they are chosen, their parish and job are recorded so you can find them.
               </p>
               <div class="jp-callout">
                 <p class="govbb-text-body">JPs do this job for free. They are <strong>not allowed to charge you</strong>. If you already know a JP — a neighbour, a teacher, a church elder, someone you work with — you can just go to them.</p>
               </div>
             </section>
 
-            <!-- "At a glance" sidebar copy used on mobile only. CSS hides it on desktop. -->
-            <aside class="service__sidebar service__sidebar--inline" aria-label="At a glance">
-              <h2 class="govbb-text-h2">At a glance</h2>
-              <p><strong>Cost:</strong> Free</p>
-              <p><strong>How long:</strong> 10–20 min</p>
-              <p><strong>Bring:</strong> Photo ID and the original document</p>
-              <p><strong>Not the same as:</strong> A lawyer or a notary public</p>
-              <a class="govbb-btn" href="find-a-jp.html" style="margin-top: var(--spacing-xs)">Find a JP</a>
-            </aside>
-
             <!-- What a JP can help with -->
             <section class="service__section">
               <h2 class="govbb-text-h2">What can a JP help you with?</h2>
-              <p class="govbb-text-body">JP help is free. You do not pay a JP.</p>
-            <div class="jp-roles">
-              <div class="jp-role">
-                <h3>Check a copy of a document</h3>
-                <p>A JP can look at your original document and a copy of it, then confirm the copy is correct. You need this for things like passports, birth certificates and driving licences.</p>
+              <p class="govbb-text-body">Most people visit a JP for one of three reasons. All three are free.</p>
+              <div class="jp-do">
+                <dl>
+                  <div>
+                    <dt>Certify a copy of a document</dt>
+                    <dd>A JP looks at your original document and a copy of it, then signs the copy to confirm it matches. You need this for things like passport applications, school enrolments and overseas job applications.</dd>
+                  </div>
+                  <div>
+                    <dt>Sworn statements and affidavits</dt>
+                    <dd>If you need to put something in writing and swear it is true — a statutory declaration, an affidavit for a court matter, or a sworn statement for a bank or government office — a JP can watch you sign it, take your oath, and sign the document to confirm everything was done properly.</dd>
+                  </div>
+                  <div>
+                    <dt>Witness a signature on legal papers</dt>
+                    <dd>For documents that need an independent person to confirm you signed in their presence — like consent forms or simple agreements — a JP can be that witness.</dd>
+                  </div>
+                </dl>
               </div>
-              <div class="jp-role">
-                <h3>Witness a written statement</h3>
-                <p>If you need to write down something that is true and sign it officially, a JP can watch you sign it. Banks, courts and government offices often need this.</p>
-              </div>
-              <div class="jp-role">
-                <h3>Give an oath</h3>
-                <p>A JP can ask you to make a solemn promise that what you are saying is true. This is needed when you make a formal statement for court.</p>
-              </div>
-              <div class="jp-role">
-                <h3>Sign a sworn statement</h3>
-                <p>A JP can sign a written statement that you have sworn is true. Courts and government offices accept these statements when a JP has signed them.</p>
-              </div>
-              <div class="jp-role">
-                <h3>Witness legal papers</h3>
-                <p>A JP can watch you sign important legal papers, like permission forms or agreements, when you need an independent person to be there.</p>
-              </div>
-              <div class="jp-role">
-                <h3>Help in your community</h3>
-                <p>JPs connect people with the government. They can help if you have a worry about safety in your area or need to make an official complaint.</p>
-              </div>
-            </div>
           </section>
 
             <!-- What a JP cannot do -->
@@ -325,7 +294,7 @@
                 <li>Check a copy without seeing the original document</li>
                 <li>Sign a document they have a personal stake in</li>
                 <li>Charge you money for their help</li>
-                <li>Stamp documents that are going to be used in another country (you need a notary public for that — see below)</li>
+                <li>Stamp documents that are going to be used in another country — for that you need a <strong>notary public</strong>, who is a lawyer or chartered accountant the Government has given extra powers to certify documents for overseas use</li>
               </ul>
             </div>
             <div class="jp-callout">
@@ -358,12 +327,12 @@
           <section class="service__section">
             <h2 class="govbb-text-h2">What to bring when you visit a JP</h2>
             <ul class="govbb-list govbb-list--bullet">
-              <li>the original document and the copy you want checked — the JP needs to see both</li>
+              <li>the original document and the copy you want certified — the JP needs to see both</li>
               <li>a photo ID (passport, national ID card or driving licence)</li>
               <li>any other documents the organisation asking you has requested</li>
             </ul>
             <p class="govbb-text-body">
-              Do not sign your statement before you get there. You must sign it in front of the JP.
+              If you are signing something in front of the JP — an affidavit, a sworn statement or a witnessed form — <strong>do not sign it before you arrive</strong>. You must sign in front of them.
             </p>
             <div class="jp-callout">
               <p class="govbb-text-body">
@@ -372,30 +341,33 @@
             </div>
           </section>
 
+          <!-- Primary CTA — placed after the can/cannot/notary/bring sections
+               so users have qualified themselves (JP vs notary, what to bring)
+               before they commit to the search. -->
+          <section class="service__section">
+            <div class="jp-cta">
+              <h2 class="govbb-text-h2">Find a JP near you</h2>
+              <p class="govbb-text-body">Search the official list by parish or use your location.</p>
+              <a class="govbb-btn" href="find-a-jp.html">Find a JP</a>
+            </div>
+          </section>
+
           <!-- How JPs are picked -->
           <section class="service__section">
             <h2 class="govbb-text-h2">How JPs are picked in Barbados</h2>
-            <p class="govbb-text-body">JPs are chosen by the Government of Barbados. The steps are:</p>
+            <p class="govbb-text-body">JPs are appointed by the President of Barbados on the advice of the Cabinet. The steps are:</p>
             <ol class="govbb-list govbb-list--number">
-              <li>Members of Parliament suggest people from their area who would be good JPs.</li>
-              <li>The Cabinet of Barbados looks at the names and decides who to pick.</li>
+              <li>The Cabinet of Barbados decides who to put forward as a JP.</li>
               <li>The President of Barbados officially appoints them.</li>
+              <li>The appointment is published in the Official Gazette.</li>
               <li>Each new JP takes an oath at a public ceremony before they can start work.</li>
             </ol>
             <p class="govbb-text-body">
-              The list of JPs has grown a lot since 2023. More than 900 new JPs were added in 2024 and 2026 alone.
+              Once someone becomes a JP, they stay a JP for life unless they choose to stop or are removed.
             </p>
-          </section>
-
-          <!-- CTA -->
-          <section class="service__section">
-            <div class="jp-cta-row">
-              <div class="jp-cta-row__text">
-                <h2 class="govbb-text-h2">Find a JP near you</h2>
-                <p class="govbb-text-body">Search the official list by parish or use your location.</p>
-              </div>
-              <a class="govbb-btn" href="find-a-jp.html">Start now</a>
-            </div>
+            <p class="govbb-text-body">
+              The list of JPs has grown a lot since 2023 — see <a class="govbb-link" href="#sources">where this information comes from</a> for the exact numbers and dates.
+            </p>
           </section>
 
           <!-- Contact -->
@@ -427,19 +399,22 @@
           </section>
 
           <!-- Source -->
-          <section class="service__section">
+          <section class="service__section" id="sources">
             <h2 class="govbb-text-h2">Where this information comes from</h2>
             <p class="govbb-text-body">
               The list of JPs on the next page is the official register kept by the Supreme Court of Barbados. The Supreme Court last updated the public list on <strong>30 April 2023</strong>.
             </p>
             <p class="govbb-text-body">
-              In <strong>October 2024</strong> the Government appointed 344 new JPs, and in <strong>January 2026</strong> a further 563 new JPs were sworn in at a public ceremony. Those names will be added to the public list when the Supreme Court next updates it.
+              In <strong>2024</strong> the Government appointed <strong>436 new JPs</strong>. You can <a class="govbb-link" href="Justices%20of%20the%20Peace%20appointed%20in%202024.pdf" target="_blank" rel="noopener noreferrer">download the official 2024 list (PDF, 15 pages)</a> for the full names, addresses and parishes.
+            </p>
+            <p class="govbb-text-body">
+              In <strong>January 2026</strong> a further <strong>563 new JPs</strong> were sworn in at a public ceremony. Those names will be added to the public list when the Supreme Court next updates it.
             </p>
             <p class="govbb-text-body">
               Every JP appointment is officially announced in the <strong>Official Gazette of Barbados</strong>, published by the Government Printery. If you want to see the original notice for a JP, search the Gazette for the date of their swearing-in.
             </p>
             <p class="jp-source">
-              Sources: Supreme Court of Barbados — Register of Justices of the Peace (30 April 2023); the <a class="govbb-link" href="https://governmentprintery.gov.bb/gazette/" target="_blank" rel="noopener noreferrer">Official Gazette of Barbados</a> (Government Printery) for the original appointment notices; Government of Barbados — public announcements of new JP appointments (October 2024, January 2026); Office of the Attorney General. Phone (246) 467-7370 to check whether someone is a JP.
+              Sources: Supreme Court of Barbados — Register of Justices of the Peace (30 April 2023); <a class="govbb-link" href="Justices%20of%20the%20Peace%20appointed%20in%202024.pdf" target="_blank" rel="noopener noreferrer">Justices of the Peace appointed in 2024</a> (official list, 436 names); the <a class="govbb-link" href="https://governmentprintery.gov.bb/gazette/" target="_blank" rel="noopener noreferrer">Official Gazette of Barbados</a> (Government Printery) for the original appointment notices; Government of Barbados — public announcement of 563 new JPs (January 2026); Office of the Attorney General. Phone (246) 467-7370 to check whether someone is a JP.
             </p>
           </section>
 
@@ -452,16 +427,6 @@
             </div>
 
           </div><!-- /service__column -->
-
-          <!-- Desktop sidebar — sticky in the right column. Hidden on mobile by CSS. -->
-          <aside class="service__sidebar service__sidebar--side" aria-label="At a glance">
-            <h2 class="govbb-text-h2">At a glance</h2>
-            <p><strong>Cost:</strong> Free</p>
-            <p><strong>How long:</strong> 10–20 min</p>
-            <p><strong>Bring:</strong> Photo ID and the original document</p>
-            <p><strong>Not the same as:</strong> A lawyer or a notary public</p>
-            <a class="govbb-btn" href="find-a-jp.html" style="margin-top: var(--spacing-xs)">Find a JP</a>
-          </aside>
 
         </div>
       </div>
