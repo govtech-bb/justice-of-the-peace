@@ -369,6 +369,201 @@
         .jp-layout__list { order: 2; }
         #jp-map { height: 380px; }
       }
+
+      /* ─────────────────────────────────────────────────────────────────
+         Shelter-style finder design
+         Ported from the "Find an emergency shelter" service.css so this
+         page matches that prototype: filter sidebar + results column,
+         card-based results, tag pills, info notice and source line.
+         All tokens below resolve against @govtech-bb/styles alpha.16.
+         ───────────────────────────────────────────────────────────────── */
+
+      /* Token / helper shims (defined locally by the design system but not
+         in this package version). */
+      :root { --color-light-grey-20: #d9dde1; }
+      .govbb-visually-hidden {
+        position: absolute !important;
+        width: 1px; height: 1px;
+        padding: 0; margin: -1px;
+        overflow: hidden; clip: rect(0 0 0 0);
+        white-space: nowrap; border: 0;
+      }
+
+      /* Page intro */
+      .service-meta { color: var(--color-text-muted); margin-block: var(--spacing-xs) var(--spacing-s); }
+      .service-lede { margin-bottom: var(--spacing-m); max-width: 48rem; }
+      .service-divider {
+        border: 0;
+        border-top: 1px solid var(--color-grey-00);
+        margin-block: var(--spacing-m);
+        max-width: 48rem;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        margin-block: var(--spacing-s);
+      }
+      .back-link::before {
+        content: "";
+        display: inline-block;
+        width: 0; height: 0;
+        border: 6px solid transparent;
+        border-right: 8px solid currentColor;
+        border-left-width: 0;
+      }
+
+      /* Info / status notice */
+      .notice {
+        padding: var(--spacing-s) var(--spacing-xm);
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--spacing-m);
+      }
+      .notice > p { margin: 0; }
+      .notice--info { background: var(--color-blue-10); border-left: 8px solid var(--color-blue-100); }
+
+      /* Finder layout: filter sidebar + results column */
+      .finder__grid { display: grid; gap: var(--spacing-m); grid-template-columns: 1fr; }
+      @media (min-width: 1024px) {
+        .finder__grid { grid-template-columns: 18rem 1fr; align-items: start; }
+      }
+      .finder__filters {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-s);
+        padding: var(--spacing-m);
+        background: var(--color-blue-10);
+        border-radius: var(--radius-sm);
+        align-self: start;
+      }
+      @media (min-width: 1024px) {
+        .finder__filters {
+          position: sticky;
+          top: var(--spacing-s);
+          max-height: calc(100vh - 2 * var(--spacing-s));
+          overflow-y: auto;
+        }
+      }
+      .finder__filters h2 { margin: 0; font-size: var(--font-size-h3); line-height: var(--line-height-h3); }
+      .finder__results { min-width: 0; }
+      .filter-group { display: flex; flex-direction: column; gap: var(--spacing-xs); }
+
+      /* "Use my location" button — full width, with icon */
+      .use-location-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        justify-content: center;
+      }
+      .use-location-btn__icon { width: 18px; height: 18px; flex-shrink: 0; }
+
+      /* Radius picker sits in the sidebar; white background reads against the
+         pale-blue filter panel. Hidden until a location is set. */
+      .finder__filters .jp-radius-group {
+        background: var(--color-background);
+        margin: 0;
+        grid-column: auto;
+      }
+
+      /* Map block at the top of the results column */
+      .jp-map-block { margin-bottom: var(--spacing-m); display: flex; flex-direction: column; gap: var(--spacing-xs); }
+      .jp-map-block #jp-map { height: clamp(320px, 50vh, 460px); }
+
+      /* Results meta line */
+      .finder__count { font-weight: var(--font-weight-bold); margin: 0; }
+
+      /* Results grid of JP cards */
+      .jp-list.finder__list {
+        display: grid;
+        gap: var(--spacing-s);
+        grid-template-columns: 1fr;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      @media (min-width: 720px) { .jp-list.finder__list { grid-template-columns: 1fr 1fr; } }
+
+      /* JP card — mirrors the shelter card. Overrides the old list-row look. */
+      .jp-list__item.shelter {
+        padding: var(--spacing-s) var(--spacing-xm);
+        border: 2px solid var(--color-grey-00);
+        border-radius: var(--radius-sm);
+        background: var(--color-background);
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+      }
+      /* Highlight the card whose JP is focused on the map. */
+      .jp-list__item.shelter:has(.jp-list__btn[aria-pressed="true"]) {
+        border-color: var(--color-teal-00);
+        box-shadow: inset 4px 0 0 var(--color-teal-00);
+      }
+      /* The clickable name (toggles the map pin). Override old grid button. */
+      .jp-list__btn {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: transparent;
+        border: 0;
+        padding: 0;
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+      }
+      .jp-list__btn .shelter__name {
+        font-size: var(--font-size-h4);
+        line-height: var(--line-height-h4);
+        font-weight: var(--font-weight-bold);
+        margin: 0;
+        color: var(--color-link);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .jp-list__btn:hover .shelter__name { color: var(--color-link-hover); }
+      .jp-list__btn:focus-visible { outline: 4px solid var(--color-teal-100); outline-offset: 2px; }
+
+      .shelter__tags { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
+      .tag {
+        font-size: var(--font-size-caption-sm);
+        font-weight: var(--font-weight-bold);
+        padding: .125rem .5rem;
+        border-radius: var(--radius-sm);
+        background: var(--color-grey-00);
+        color: var(--color-text);
+      }
+      .tag--parish { background: var(--color-blue-10); }
+      .tag--work { background: var(--color-yellow-40); }
+      .tag--dist { background: var(--color-green-40); }
+      .shelter__address { margin: 0; font-size: var(--font-size-caption); color: var(--color-text); }
+      .shelter__address::before { content: "📍 "; }
+      .shelter__actions { margin: 0; font-size: var(--font-size-caption); }
+      .shelter__link { color: var(--color-link); text-decoration: underline; text-underline-offset: 2px; }
+      .shelter__link:hover { color: var(--color-link-hover); background-color: var(--color-link-hover-bg); }
+
+      /* Related information block + source line */
+      .related-info { margin-top: var(--spacing-l); padding-top: var(--spacing-m); border-top: 4px solid var(--color-grey-00); }
+      .related-info > h2 { font-size: var(--font-size-h3); line-height: var(--line-height-h3); margin-bottom: var(--spacing-s); }
+      .service-source {
+        margin-top: var(--spacing-l);
+        padding-top: var(--spacing-m);
+        border-top: 1px solid var(--color-grey-00);
+        color: var(--color-text-muted);
+        max-width: 48rem;
+      }
+
+      /* Print: drop chrome, lay cards out compactly for a paper copy. */
+      @media print {
+        .govbb-official-banner, .govbb-header, .govbb-status-banner,
+        .govbb-breadcrumbs, .govbb-footer, .finder__filters,
+        .jp-map-block, .related-info, .jp-skip-link, .service__feedback,
+        .back-link { display: none !important; }
+        .finder__grid { display: block; }
+        .jp-list.finder__list { display: block; }
+        .jp-list__item.shelter { border: 1px solid #999; margin-bottom: 4pt; break-inside: avoid; }
+        .jp-list__btn .shelter__name { color: #000; text-decoration: none; }
+        a { color: #000; text-decoration: none; }
+      }
     </style>
   </head>
   <body class="govbb-page">
@@ -435,89 +630,101 @@
           </ol>
         </nav>
 
-        <header class="jp-page__head">
-          <p class="govbb-text-caption">Last updated on May 22nd, 2026</p>
-          <h1 class="govbb-text-h1">Find a Justice of the Peace</h1>
-          <p class="govbb-text-body">Search the official directory of Justices of the Peace in Barbados. Filter by parish, or use your location to find JPs nearby.</p>
-        </header>
+        <a class="govbb-link back-link" href="index.html">Back to Justice of the Peace</a>
 
-        <section class="jp-search-box" aria-label="Filter Justices of the Peace">
+        <h1 class="govbb-text-h1">Find a Justice of the Peace</h1>
+        <p class="service-meta govbb-text-caption">Last updated on May 22, 2026.</p>
+        <hr class="service-divider">
 
-          <div class="govbb-form-group">
-            <label class="govbb-label" for="parish">Find by parish</label>
-            <div class="govbb-select-wrapper">
-              <select class="govbb-select" id="parish" name="parish" onchange="runSearch()">
-                <option value="">All parishes</option>
-                <option value="Christ Church">Christ Church</option>
-                <option value="St. Andrew">St. Andrew</option>
-                <option value="St. George">St. George</option>
-                <option value="St. James">St. James</option>
-                <option value="St. John">St. John</option>
-                <option value="St. Joseph">St. Joseph</option>
-                <option value="St. Lucy">St. Lucy</option>
-                <option value="St. Michael">St. Michael</option>
-                <option value="St. Peter">St. Peter</option>
-                <option value="St. Philip">St. Philip</option>
-                <option value="St. Thomas">St. Thomas</option>
-              </select>
-              <span class="govbb-select__chevron" aria-hidden="true">
-                <svg viewBox="0 0 12 8"><path d="M6 0 0 8h12z" /></svg>
-              </span>
-            </div>
-          </div>
+        <p class="govbb-text-body service-lede">
+          Search the official directory of Justices of the Peace in Barbados. Filter by parish, or use your location to find JPs near you.
+        </p>
 
-          <div class="govbb-form-group">
-            <label class="govbb-label" for="geoBtn">Find by location</label>
-            <button class="govbb-btn govbb-btn--secondary" type="button" id="geoBtn" onclick="locateMe()">Use my location</button>
-            <p class="govbb-error-message jp-geo-error" id="geoError" role="alert" hidden></p>
-          </div>
-
-          <div class="jp-radius-group" id="jp-radius-group" role="group" aria-labelledby="radius-legend">
-            <p class="jp-radius-group__legend" id="radius-legend">Show JPs within:</p>
-            <div class="jp-radius-pills">
-              <button class="jp-radius-pill jp-radius-pill--active" type="button" data-mi="5" onclick="setRadius(5)">5 miles</button>
-              <button class="jp-radius-pill" type="button" data-mi="10" onclick="setRadius(10)">10 miles</button>
-              <button class="jp-radius-pill" type="button" data-mi="0" onclick="setRadius(0)">Island-wide</button>
-            </div>
-          </div>
-
-          <div class="jp-search-box__reset">
-            <button class="jp-clear" type="button" onclick="clearSearch()">Clear filters</button>
-          </div>
-
-        </section>
-
-        <div class="jp-layout">
-
-          <div class="jp-layout__list">
-            <div id="resultsArea" aria-live="polite" aria-atomic="true">
-              <noscript>
-                <div class="jp-tip">
-                  <p class="govbb-text-body">
-                    <strong>This page needs JavaScript to show the JP list and map.</strong>
-                    To get a JP's contact details without JavaScript, call the Office of the Attorney General on
-                    <a class="govbb-link" href="tel:+12464677370">(246) 467-7370</a>.
-                  </p>
-                </div>
-              </noscript>
-            </div>
-            <p class="jp-disclaimer">
-              <strong>About the list.</strong> Each row shows the JP's <strong>home address</strong> by default. If only a work address is on the register, the row is tagged <em>"Work address"</em>.
-            </p>
-          </div>
-
-          <aside class="jp-layout__map" aria-label="Map of Justices of the Peace">
-            <p class="jp-map-hint" id="jp-map-hint">Choose a parish on the map to zoom in and see JPs in that area.</p>
-            <div id="jp-map"></div>
-            <p class="jp-disclaimer">
-              <strong>About these pins.</strong> The official register lists each JP's parish and address as text — it has no map coordinates. We have looked the addresses up against OpenStreetMap to place each pin, so positions are usually within a few hundred metres of the real address. Where the address is not in OpenStreetMap, the pin shows the nearest known landmark instead. Always confirm using the address shown in the list.
-            </p>
-          </aside>
-
+        <div class="notice notice--info" role="region" aria-label="About this list">
+          <p>
+            <strong>Each card shows the JP's home address by default.</strong> If only a work address is on the register, the card is tagged "Work address". To check whether someone is currently a JP, phone the Office of the Attorney General on <a class="govbb-link" href="tel:+12464677370">(246) 467-7370</a>.
+          </p>
         </div>
 
-        <section class="jp-sources" id="sources" aria-labelledby="sources-heading">
-          <h2 class="govbb-text-h2" id="sources-heading">Where this information comes from</h2>
+        <section class="finder" aria-labelledby="finder-heading">
+          <h2 id="finder-heading" class="govbb-visually-hidden">Justice of the Peace finder</h2>
+
+          <div class="finder__grid">
+            <aside class="finder__filters" aria-label="Filter Justices of the Peace">
+              <h2 class="govbb-text-h3">Filters</h2>
+
+              <div class="filter-group">
+                <button class="govbb-btn use-location-btn" type="button" id="geoBtn" onclick="locateMe()">
+                  <svg class="use-location-btn__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+                    <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                  </svg>
+                  <span>Use my location</span>
+                </button>
+                <p class="govbb-error-message jp-geo-error" id="geoError" role="alert" hidden></p>
+              </div>
+
+              <div class="jp-radius-group" id="jp-radius-group" role="group" aria-labelledby="radius-legend">
+                <p class="jp-radius-group__legend" id="radius-legend">Show JPs within:</p>
+                <div class="jp-radius-pills">
+                  <button class="jp-radius-pill jp-radius-pill--active" type="button" data-mi="5" onclick="setRadius(5)">5 miles</button>
+                  <button class="jp-radius-pill" type="button" data-mi="10" onclick="setRadius(10)">10 miles</button>
+                  <button class="jp-radius-pill" type="button" data-mi="0" onclick="setRadius(0)">Island-wide</button>
+                </div>
+              </div>
+
+              <div class="govbb-form-group filter-group">
+                <label class="govbb-label" for="parish">Parish</label>
+                <div class="govbb-select-wrapper">
+                  <select class="govbb-select" id="parish" name="parish" onchange="runSearch()">
+                    <option value="">All parishes</option>
+                    <option value="Christ Church">Christ Church</option>
+                    <option value="St. Andrew">St. Andrew</option>
+                    <option value="St. George">St. George</option>
+                    <option value="St. James">St. James</option>
+                    <option value="St. John">St. John</option>
+                    <option value="St. Joseph">St. Joseph</option>
+                    <option value="St. Lucy">St. Lucy</option>
+                    <option value="St. Michael">St. Michael</option>
+                    <option value="St. Peter">St. Peter</option>
+                    <option value="St. Philip">St. Philip</option>
+                    <option value="St. Thomas">St. Thomas</option>
+                  </select>
+                  <span class="govbb-select__chevron" aria-hidden="true">
+                    <svg viewBox="0 0 12 8"><path d="M6 0 0 8h12z" /></svg>
+                  </span>
+                </div>
+              </div>
+
+              <div class="filter-group">
+                <button class="jp-clear" type="button" onclick="clearSearch()">Clear filters</button>
+              </div>
+            </aside>
+
+            <div class="finder__results">
+              <div class="jp-map-block">
+                <p class="jp-map-hint" id="jp-map-hint">Choose a parish on the map to zoom in and see JPs in that area.</p>
+                <div id="jp-map"></div>
+              </div>
+
+              <div id="resultsArea" aria-live="polite" aria-atomic="true">
+                <noscript>
+                  <div class="jp-tip">
+                    <p class="govbb-text-body">
+                      <strong>This page needs JavaScript to show the JP list and map.</strong>
+                      To get a JP's contact details without JavaScript, call the Office of the Attorney General on
+                      <a class="govbb-link" href="tel:+12464677370">(246) 467-7370</a>.
+                    </p>
+                  </div>
+                </noscript>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="related-info" id="sources" aria-labelledby="sources-heading">
+          <h2 id="sources-heading">Where this information comes from</h2>
           <p class="govbb-text-body">
             The directory uses the Supreme Court of Barbados register (last updated 30 April 2023), the
             <a class="govbb-link" href="Justices%20of%20the%20Peace%20appointed%20in%202024.pdf" target="_blank" rel="noopener noreferrer">official 2024 list (PDF, 436 names)</a>
@@ -529,7 +736,12 @@
             Looking for a notary public instead? See <a class="govbb-link" href="index.html#notary">Justice of the Peace</a> for the difference, or
             <a class="govbb-link" href="https://alpha.gov.bb/travel-id-citizenship/get-a-document-notarised">Get a document notarised</a> for the official process.
           </p>
-        </section>
+        </aside>
+
+        <p class="service-source govbb-text-caption">
+          <strong>About the map pins.</strong> The official register lists each JP's parish and address as text — it has no map coordinates. We looked the addresses up against OpenStreetMap to place each pin, so positions are usually within a few hundred metres of the real address. Where an address is not in OpenStreetMap, the pin shows the nearest known landmark instead. Always confirm using the address shown on the card.<br>
+          Pin locations © <a class="govbb-link" href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap</a> contributors.
+        </p>
 
         <div class="service__feedback">
           <h3 class="govbb-text-h3">Was this helpful?</h3>
@@ -2918,26 +3130,40 @@
           ? haversine(pickedLocation.lat, pickedLocation.lng, jp.lat, jp.lng) : null;
         var distLabel = distKm !== null
           ? (distKm < 1 ? Math.round(distKm * 1000) + ' m' : distKm.toFixed(1) + ' km') : '';
-        var distBadge = distLabel ? '<span class="jp-list__dist">' + esc(distLabel) + '</span>' : '';
         var focused = (focusedJpId === jp.id);
         var addr = jpAddress(jp);
-        var addrTag = addr.isWork
-          ? '<span class="jp-list__addr-tag">Work address</span> '
-          : '';
-        return '<li class="jp-list__item">' +
-          '<button type="button" class="jp-list__btn" data-jp-id="' + jp.id + '" onclick="toggleFocus(' + jp.id + ')" aria-pressed="' + (focused ? 'true' : 'false') + '" aria-label="' + esc(jp.name) + ', ' + esc(jp.parish) + (distLabel ? ', ' + distLabel + ' away' : '') + '">' +
-            '<span class="jp-list__name">' + esc(jp.name) + '</span>' +
-            distBadge +
-            '<span class="jp-list__parish">' + esc(jp.parish) + '</span>' +
-            '<span class="jp-list__address">' + addrTag + esc(addr.text) + '</span>' +
+
+        /* Tag pills — parish always; "Work address" when the home address is
+           missing; distance when the user has shared a location. */
+        var tags = '<span class="tag tag--parish">' + esc(jp.parish) + '</span>';
+        if (addr.isWork) tags += '<span class="tag tag--work">Work address</span>';
+        if (distLabel)   tags += '<span class="tag tag--dist">' + esc(distLabel) + ' away</span>';
+
+        /* Address line + Google Maps directions link, only when we have a
+           usable address string for this JP. */
+        var addressLine = addr.text
+          ? '<p class="shelter__address">' + esc(addr.text) + '</p>' : '';
+        var mapsQuery = addr.text
+          ? addr.text + ', ' + jp.parish + ', Barbados'
+          : (jp.lat && jp.lng ? jp.lat + ',' + jp.lng : jp.parish + ', Barbados');
+        var directions = '<p class="shelter__actions"><a class="shelter__link" href="' +
+          'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(mapsQuery) +
+          '" target="_blank" rel="noopener noreferrer">Get directions on Google Maps</a></p>';
+
+        return '<li class="jp-list__item shelter" role="listitem">' +
+          '<button type="button" class="jp-list__btn" data-jp-id="' + jp.id + '" onclick="toggleFocus(' + jp.id + ')" aria-pressed="' + (focused ? 'true' : 'false') + '" aria-label="' + esc(jp.name) + ', ' + esc(jp.parish) + (distLabel ? ', ' + distLabel + ' away' : '') + ', show on map">' +
+            '<span class="shelter__name">' + esc(jp.name) + '</span>' +
           '</button>' +
+          '<div class="shelter__tags">' + tags + '</div>' +
+          addressLine +
+          directions +
         '</li>';
       }).join('');
       el.innerHTML = '<div class="jp-results-meta">' +
-          '<p class="govbb-text-body"><strong>' + esc(countLabel) + '</strong></p>' +
+          '<p class="finder__count">' + esc(countLabel) + '</p>' +
           '<button class="jp-clear" type="button" onclick="clearSearch()">Clear</button>' +
         '</div>' +
-        '<ul class="jp-list" aria-label="JP search results">' + rows + '</ul>' +
+        '<ul class="jp-list finder__list" aria-label="JP search results">' + rows + '</ul>' +
         showMoreBtn +
         '<div class="jp-tip jp-tip--soft"><p class="govbb-text-body"><strong>You may already know one of these people.</strong> ' +
         'If you recognise a name on this list, you can go to them directly — no appointment or referral needed.</p></div>';
