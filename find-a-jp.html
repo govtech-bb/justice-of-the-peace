@@ -660,18 +660,9 @@
                     <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2"/>
                     <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
                   </svg>
-                  <span>Use my location</span>
+                  <span id="geoBtnLabel">Use my location</span>
                 </button>
                 <p class="govbb-error-message jp-geo-error" id="geoError" role="alert" hidden></p>
-              </div>
-
-              <div class="jp-radius-group" id="jp-radius-group" role="group" aria-labelledby="radius-legend">
-                <p class="jp-radius-group__legend" id="radius-legend">Show JPs within:</p>
-                <div class="jp-radius-pills">
-                  <button class="jp-radius-pill jp-radius-pill--active" type="button" data-mi="5" onclick="setRadius(5)">5 miles</button>
-                  <button class="jp-radius-pill" type="button" data-mi="10" onclick="setRadius(10)">10 miles</button>
-                  <button class="jp-radius-pill" type="button" data-mi="0" onclick="setRadius(0)">Island-wide</button>
-                </div>
               </div>
 
               <div class="govbb-form-group filter-group">
@@ -704,7 +695,6 @@
 
             <div class="finder__results">
               <div class="jp-map-block">
-                <p class="jp-map-hint" id="jp-map-hint">Choose a parish on the map to zoom in and see JPs in that area.</p>
                 <div id="jp-map"></div>
               </div>
 
@@ -3030,7 +3020,8 @@
     var PAGE_SIZE         = 20;
     var displayCount      = 20;   /* how many results are currently shown */
     var radiusCircle      = null;
-    var locationSetByParish = false; /* true when pickedLocation came from parish centroid */
+    var locationSetByParish = false; /* retained for compatibility; no longer set */
+    var contextSuffix    = ' across all parishes'; /* count-label suffix: " in X" / " near your location" / " across all parishes" */
 
     /* ── Utilities ────────────────────────────────────────────────────── */
     function fuzzy(query, target) {
@@ -3078,28 +3069,16 @@
     }
 
     /* ── Search (works with or without map) ──────────────────────────── */
-    function renderResults(contextLabel) {
+    function renderResults() {
       var results = currentResults;
       var el = document.getElementById('resultsArea');
       if (!results.length) {
-        var noResultMsg;
-        if (pickedLocation) {
-          var widerOptions = [];
-          if (searchRadius <= 5)  widerOptions.push('<button type="button" class="jp-clear" onclick="setRadius(10)">10 miles</button>');
-          if (searchRadius < 50)  widerOptions.push('<button type="button" class="jp-clear" onclick="setRadius(0)">Island-wide</button>');
-          noResultMsg =
-            '<p class="govbb-text-body">No JPs found within ' + (searchRadius > 0 ? searchRadius + ' miles' : 'the island') + ' of your location.</p>' +
-            (widerOptions.length
-              ? '<p class="govbb-text-body">Try a wider radius: ' + widerOptions.join(' or ') + '.</p>'
-              : '');
-        } else {
-          noResultMsg =
+        var noResultMsg =
             '<p class="govbb-text-body">We could not find a JP matching your search. Try:</p>' +
             '<ul class="govbb-list govbb-list--bullet">' +
-              '<li>Picking a nearby parish</li>' +
+              '<li>Picking another parish</li>' +
               '<li>Using your location instead</li>' +
             '</ul>';
-        }
         el.innerHTML = '<div class="jp-no-results">' +
           '<h3 class="govbb-text-h3">No JPs found</h3>' +
           noResultMsg +
@@ -3112,9 +3091,9 @@
       }
       var total   = results.length;
       var page    = results.slice(0, displayCount);
-      /* No parish / location chosen → describe the list as "across all
-         parishes" so users know nothing is filtered out. Otherwise "near X". */
-      var near    = contextLabel ? ' near ' + contextLabel : ' across all parishes';
+      /* Suffix set by runSearch/clearSearch: " in <parish>", " near your
+         location", or " across all parishes" when nothing is filtered. */
+      var near    = contextSuffix;
       var countLabel = total === 1 ? '1 JP found' + near
                      : displayCount >= total ? total + ' JPs found' + near
                      : 'Showing ' + displayCount + ' of ' + total + ' JPs' + near;
@@ -3176,9 +3155,7 @@
 
     window.showMore = function() {
       displayCount += PAGE_SIZE;
-      var parish = document.getElementById('parish').value;
-      var contextLabel = locationSetByParish ? parish : pickedLocation ? 'your location' : null;
-      renderResults(contextLabel);
+      renderResults();
       var rows = document.querySelectorAll('.jp-list__item');
       var firstNew = rows[displayCount - PAGE_SIZE];
       if (firstNew) firstNew.scrollIntoView({behavior: 'smooth', block: 'start'});
@@ -3194,95 +3171,50 @@
         b.classList.toggle('jp-parish-label--active', b.getAttribute('data-parish') === parish);
       });
 
-      /* Parish selected and no explicit user pin → use centroid as location */
-      if (parish && (!pickedLocation || locationSetByParish)) {
-        var c = PARISH_CENTRES[parish];
-        if (c) { pickedLocation = {lat: c[0], lng: c[1]}; locationSetByParish = true; }
-        if (jpMap && PARISH_BOUNDS[parish]) jpMap.fitBounds(PARISH_BOUNDS[parish], {padding:[30,30]});
-        document.getElementById('jp-radius-group').classList.add('jp-radius-group--visible');
-        setHint('Showing the closest JPs to your selected area, including those in neighbouring parishes.');
-      }
-
-      /* Parish cleared while centroid was our only location → remove it */
-      if (!parish && locationSetByParish) {
-        pickedLocation = null;
-        locationSetByParish = false;
-        if (jpMap && radiusCircle) { jpMap.removeLayer(radiusCircle); radiusCircle = null; }
-        document.getElementById('jp-radius-group').classList.remove('jp-radius-group--visible');
-        if (jpMap) jpMap.setView([13.18, -59.555], 11);
-        setHint('Pick a parish or use your location to narrow the list.');
-      }
-
-      /* Start from the full list — radius below narrows by geography */
+      selectedParish = parish;
       currentResults = JPS.slice();
 
-      /* Radius filter + distance sort when a location pin is set */
+      if (parish) {
+        /* Filter strictly to the chosen parish. */
+        currentResults = currentResults.filter(function(jp) { return jp.parish === parish; });
+        contextSuffix = ' in ' + parish;
+        if (jpMap && PARISH_BOUNDS[parish]) jpMap.fitBounds(PARISH_BOUNDS[parish], {padding:[30,30]});
+      } else {
+        contextSuffix = pickedLocation ? ' near your location' : ' across all parishes';
+        if (jpMap && !pickedLocation) jpMap.setView([13.18, -59.555], 11);
+      }
+
+      /* When the user has shared their real location, order nearest-first. */
       if (pickedLocation) {
-        var radiusKm = searchRadius * MILES_TO_KM;
-        if (searchRadius > 0) {
-          currentResults = currentResults.filter(function(jp) {
-            return jp.lat && jp.lng && haversine(pickedLocation.lat, pickedLocation.lng, jp.lat, jp.lng) <= radiusKm;
-          });
-        }
         currentResults.sort(function(a, b) {
           var da = (a.lat && a.lng) ? haversine(pickedLocation.lat, pickedLocation.lng, a.lat, a.lng) : Infinity;
           var db = (b.lat && b.lng) ? haversine(pickedLocation.lat, pickedLocation.lng, b.lat, b.lng) : Infinity;
           return da - db;
         });
-        /* Draw radius ring */
-        if (jpMap) {
-          if (radiusCircle) jpMap.removeLayer(radiusCircle);
-          if (searchRadius > 0) {
-            radiusCircle = L.circle([pickedLocation.lat, pickedLocation.lng], {
-              radius: radiusKm * 1000, color: '#0F6E56', weight: 2,
-              fillColor: '#0F6E56', fillOpacity: 0.06, dashArray: '6 4', interactive: false
-            }).addTo(jpMap);
-            if (!parish) jpMap.fitBounds(radiusCircle.getBounds(), {padding: [20, 20]});
-          } else {
-            radiusCircle = null;
-            if (!parish) jpMap.setView([pickedLocation.lat, pickedLocation.lng], 11);
-          }
-        }
       }
 
       displayCount = PAGE_SIZE;
-      var contextLabel = locationSetByParish ? parish : pickedLocation ? 'your location' : null;
       /* renderResults now drives updateMarkers itself, so the map stays in
          lockstep with the visible list. */
-      renderResults(contextLabel);
+      renderResults();
     }
-
-    window.setRadius = function(mi) {
-      searchRadius = mi;
-      document.querySelectorAll('.jp-radius-pill').forEach(function(btn) {
-        btn.classList.toggle('jp-radius-pill--active', parseInt(btn.getAttribute('data-mi'), 10) === mi);
-      });
-      var label = mi > 0 ? mi + ' miles' : 'the whole island';
-      setHint('Showing JPs within ' + label + '. Pick another parish, or click "Use my location" again, to change the search.');
-      if (pickedLocation) runSearch();
-    };
 
     function clearSearch() {
       selectedParish = '';
       pickedLocation = null;
       focusedJpId   = null;
-      searchRadius = 5; locationSetByParish = false; displayCount = PAGE_SIZE;
+      displayCount = PAGE_SIZE;
+      contextSuffix = ' across all parishes';
       document.getElementById('parish').value = '';
       var geoErr = document.getElementById('geoError');
       if (geoErr) { geoErr.hidden = true; geoErr.textContent = ''; }
       currentResults = JPS.slice();
-      renderResults(null);
-      document.getElementById('jp-radius-group').classList.remove('jp-radius-group--visible');
-      document.querySelectorAll('.jp-radius-pill').forEach(function(btn) {
-        btn.classList.toggle('jp-radius-pill--active', parseInt(btn.getAttribute('data-mi'), 10) === 5);
-      });
+      renderResults();
       document.querySelectorAll('.jp-parish-label').forEach(function(b) { b.classList.remove('jp-parish-label--active'); });
       if (jpMap) {
         if (locationMarker) { jpMap.removeLayer(locationMarker); locationMarker = null; }
-        if (radiusCircle)   { jpMap.removeLayer(radiusCircle);   radiusCircle   = null; }
         jpMap.setView([13.18,-59.555], 11);
       }
-      setHint('Every JP icon you see is a Justice of the Peace. Pick a parish or use your location to narrow the list.');
     }
 
     /* Expose to onclick attributes */
@@ -3346,9 +3278,7 @@
       }
       if (idx >= 0 && idx + 1 > displayCount) {
         displayCount = Math.ceil((idx + 1) / PAGE_SIZE) * PAGE_SIZE;
-        var parishVal = document.getElementById('parish').value;
-        var contextLabel = locationSetByParish ? parishVal : pickedLocation ? 'your location' : null;
-        renderResults(contextLabel);
+        renderResults();
       }
 
       var btn = document.querySelector('.jp-list__btn[data-jp-id="' + id + '"]');
@@ -3386,20 +3316,20 @@
 
     window.locateMe = function() {
       var btn = document.getElementById('geoBtn');
+      var lbl = document.getElementById('geoBtnLabel');
       clearGeoError();
       if (!navigator.geolocation) {
         showGeoError('Your browser does not support location access. Try picking a parish instead.');
         return;
       }
-      btn.textContent = 'Finding your location…';
+      if (lbl) lbl.textContent = 'Finding your location…';
       btn.disabled = true;
       navigator.geolocation.getCurrentPosition(
         function(pos) {
-          btn.textContent = 'Use my location';
+          if (lbl) lbl.textContent = 'Use my location';
           btn.disabled = false;
           var lat = pos.coords.latitude, lng = pos.coords.longitude;
           pickedLocation = {lat: lat, lng: lng};
-          locationSetByParish = false;
           if (jpMap) {
             if (locationMarker) { jpMap.removeLayer(locationMarker); }
             locationMarker = L.circleMarker([lat, lng], {
@@ -3408,18 +3338,15 @@
             jpMap.setView([lat, lng], 13, {animate: true});
             locationMarker.openPopup();
           }
-          /* Clear parish filter; show radius picker */
+          /* Location search shows every JP, nearest first; drop any parish. */
           document.getElementById('parish').value = '';
           document.querySelectorAll('.jp-parish-label').forEach(function(b) {
             b.classList.remove('jp-parish-label--active');
           });
-          document.getElementById('jp-radius-group').classList.add('jp-radius-group--visible');
-          var label = searchRadius > 0 ? searchRadius + ' miles' : 'the whole island';
-          setHint('Showing JPs within ' + label + ' of your location.');
           runSearch();
         },
         function(err) {
-          btn.textContent = 'Use my location';
+          if (lbl) lbl.textContent = 'Use my location';
           btn.disabled = false;
           var msg = 'We could not get your location.';
           if (err && err.code === 1) {
@@ -3565,7 +3492,8 @@
       if (!el || el.querySelector('.jp-list, .jp-no-results')) return;
       currentResults = JPS.slice();
       displayCount   = PAGE_SIZE;
-      renderResults(null);
+      contextSuffix  = ' across all parishes';
+      renderResults();
     }
     ensureDefaultList();
     if (document.readyState === 'loading') {
