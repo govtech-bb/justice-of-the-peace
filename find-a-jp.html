@@ -3146,9 +3146,7 @@
           '<button class="jp-clear" type="button" onclick="clearSearch()">Clear</button>' +
         '</div>' +
         '<ul class="jp-list finder__list" aria-label="JP search results">' + rows + '</ul>' +
-        showMoreBtn +
-        '<div class="jp-tip jp-tip--soft"><p class="govbb-text-body"><strong>You may already know one of these people.</strong> ' +
-        'If you recognise a name on this list, you can go to them directly. No appointment or referral needed.</p></div>';
+        showMoreBtn;
       /* Keep the map in sync with the visible list — same 20 (or 40, 60...)
          JPs appear as pins. No-ops until initMap has created markerLayer. */
       if (jpMap) updateMarkers(page);
