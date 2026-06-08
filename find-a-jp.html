@@ -390,12 +390,21 @@
       }
 
       /* Page intro */
-      .service-meta { color: var(--color-text-muted); margin-block: var(--spacing-xs) var(--spacing-s); }
-      .service-lede { margin-bottom: var(--spacing-m); max-width: 48rem; }
-      .service-divider {
-        border: 0;
-        border-top: 4px solid var(--color-blue-10);
-        margin-block: var(--spacing-m);
+      /* Heading block mirrors the entry page: H1 + muted "last updated"
+         grouped tightly, with a 4px blue-10 rule beneath. */
+      .jp-page__heading {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-s);
+        padding-bottom: var(--spacing-m);
+        border-bottom: 4px solid var(--color-blue-10);
+      }
+      .service-meta { color: var(--color-text-muted); margin: 0; }
+      .service-lede {
+        font-size: var(--font-size-h3);
+        color: var(--color-dark-grey-00);
+        margin: 0;
+        line-height: 1.4;
       }
       .back-link {
         display: inline-flex;
@@ -631,11 +640,12 @@
 
         <a class="govbb-link back-link" href="index.html">Back to Justice of the Peace</a>
 
-        <h1 class="govbb-text-h1">Find a Justice of the Peace</h1>
-        <p class="service-meta govbb-text-caption">Last updated on June 8, 2026.</p>
-        <hr class="service-divider">
+        <header class="jp-page__heading">
+          <h1 class="govbb-text-h1">Find a Justice of the Peace</h1>
+          <p class="service-meta govbb-text-caption">Last updated on June 8, 2026.</p>
+        </header>
 
-        <p class="govbb-text-body service-lede">
+        <p class="service-lede">
           Search the official directory of Justices of the Peace in Barbados. Filter by parish, or use your location to find JPs near you.
         </p>
 
