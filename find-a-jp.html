@@ -666,6 +666,13 @@
               </div>
 
               <div class="govbb-form-group filter-group">
+                <label class="govbb-label" for="filter-name">Search by name</label>
+                <div class="govbb-input-wrapper">
+                  <input type="search" id="filter-name" class="govbb-input" placeholder="e.g. surname" autocomplete="off" oninput="runSearch()">
+                </div>
+              </div>
+
+              <div class="govbb-form-group filter-group">
                 <label class="govbb-label" for="parish">Parish</label>
                 <div class="govbb-select-wrapper">
                   <select class="govbb-select" id="parish" name="parish" onchange="runSearch()">
@@ -3180,6 +3187,19 @@
         if (jpMap && !pickedLocation) jpMap.setView([13.18, -59.555], 11);
       }
 
+      /* Free-text search on the JP's name. Every typed word must appear
+         somewhere in the name, so word order does not matter. */
+      var nameQuery = (document.getElementById('filter-name').value || '').trim();
+      if (nameQuery) {
+        var qWords = nameQuery.toLowerCase().split(/\s+/);
+        currentResults = currentResults.filter(function(jp) {
+          var name = (jp.name || '').toLowerCase();
+          return qWords.every(function(w) { return name.indexOf(w) !== -1; });
+        });
+        contextSuffix = (contextSuffix === ' across all parishes' ? '' : contextSuffix) +
+          ' matching "' + nameQuery + '"';
+      }
+
       /* When the user has shared their real location, order nearest-first. */
       if (pickedLocation) {
         currentResults.sort(function(a, b) {
@@ -3202,6 +3222,7 @@
       displayCount = PAGE_SIZE;
       contextSuffix = ' across all parishes';
       document.getElementById('parish').value = '';
+      document.getElementById('filter-name').value = '';
       var geoErr = document.getElementById('geoError');
       if (geoErr) { geoErr.hidden = true; geoErr.textContent = ''; }
       currentResults = JPS.slice();
