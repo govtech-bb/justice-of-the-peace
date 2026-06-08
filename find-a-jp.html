@@ -725,7 +725,7 @@
         </aside>
 
         <p class="service-source govbb-text-caption">
-          <strong>About the map pins.</strong> The official register lists each JP's parish and address as text — it has no map coordinates. We looked the addresses up against OpenStreetMap to place each pin, so positions are usually within a few hundred metres of the real address. Where an address is not in OpenStreetMap, the pin shows the nearest known landmark instead. Always confirm using the address shown on the card.<br>
+          <strong>About the map pins.</strong> The official register lists each JP's parish and address as text. It has no map coordinates. We looked the addresses up against OpenStreetMap to place each pin, so positions are usually within a few hundred metres of the real address. Where an address is not in OpenStreetMap, the pin shows the nearest known landmark instead. Always confirm using the address shown on the card.<br>
           Pin locations © <a class="govbb-link" href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap</a> contributors.
         </p>
 
@@ -3141,7 +3141,7 @@
         '<ul class="jp-list finder__list" aria-label="JP search results">' + rows + '</ul>' +
         showMoreBtn +
         '<div class="jp-tip jp-tip--soft"><p class="govbb-text-body"><strong>You may already know one of these people.</strong> ' +
-        'If you recognise a name on this list, you can go to them directly — no appointment or referral needed.</p></div>';
+        'If you recognise a name on this list, you can go to them directly. No appointment or referral needed.</p></div>';
       /* Keep the map in sync with the visible list — same 20 (or 40, 60...)
          JPs appear as pins. No-ops until initMap has created markerLayer. */
       if (jpMap) updateMarkers(page);
@@ -3346,7 +3346,7 @@
           btn.disabled = false;
           var msg = 'We could not get your location.';
           if (err && err.code === 1) {
-            msg = 'Location access is turned off in your browser. Turn it on in your browser settings, then try again — or pick a parish instead.';
+            msg = 'Location access is turned off in your browser. Turn it on in your browser settings, then try again, or pick a parish instead.';
           } else if (err && err.code === 3) {
             msg = 'Finding your location took too long.';
           }
