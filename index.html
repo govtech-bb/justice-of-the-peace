@@ -16,10 +16,16 @@
       .service-page__heading {
         display: flex;
         flex-direction: column;
-        gap: var(--spacing-xs);
-        padding-bottom: var(--spacing-s);
+        gap: var(--spacing-s);
+        padding-bottom: var(--spacing-m);
+        border-bottom: 4px solid var(--color-blue-10);
       }
       .service-page__heading h1 { margin: 0; }
+      /* Muted "last updated" line, shown under the H1 above the rule. */
+      .service-page__meta {
+        color: var(--color-mid-grey-00);
+        margin: 0;
+      }
       .service-page__lede {
         font-size: var(--font-size-h3);
         color: var(--color-dark-grey-00);
@@ -138,12 +144,13 @@
         </nav>
 
         <header class="service-page__heading">
-          <p class="govbb-text-caption">Last updated on May 22nd, 2026</p>
           <h1 class="govbb-text-h1">Justice of the Peace</h1>
-          <p class="service-page__lede">A Justice of the Peace (JP) is appointed by the President of Barbados to help people with official documents: certifying copies, witnessing signatures, and taking sworn statements and affidavits. JPs are ordinary community members and their help is <strong>free of charge</strong>. They are not allowed to charge you.</p>
+          <p class="service-page__meta govbb-text-caption">Last updated on June 8th, 2026</p>
         </header>
 
         <div class="service__column">
+
+          <p class="service-page__lede">A Justice of the Peace (JP) is appointed by the President of Barbados to help people with official documents: certifying copies, witnessing signatures, and taking sworn statements and affidavits. JPs are ordinary community members and their help is <strong>free of charge</strong>. They are not allowed to charge you.</p>
 
           <section class="service__section">
             <h2 class="govbb-text-h2">How to find a Justice of the Peace</h2>
