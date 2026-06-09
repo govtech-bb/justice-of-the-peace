@@ -291,9 +291,25 @@
         border-color: var(--color-dark-blue-00);
       }
 
+      /* Centred light-grey "Show more" button (matches the shelter finder). */
       .jp-show-more {
-        margin-top: var(--spacing-s);
-        width: 100%;
+        display: block;
+        margin: var(--spacing-m) auto 0;
+        background: var(--color-grey-00);
+        color: var(--color-text);
+        border: 0;
+        border-radius: var(--radius-sm);
+        padding: var(--spacing-s) var(--spacing-l);
+        font-size: var(--font-size-h4);
+        line-height: var(--line-height-h4);
+        font-weight: 400;
+        cursor: pointer;
+        transition: background 120ms;
+      }
+      .jp-show-more:hover { background: var(--color-light-grey-20); }
+      .jp-show-more:focus-visible {
+        outline: 4px solid var(--color-teal-100);
+        outline-offset: 2px;
       }
 
       /* ─────────────────────────────────────────────────────────────────
@@ -2967,9 +2983,8 @@
                      : 'Showing ' + displayCount + ' of ' + total + ' JPs' + near;
       var remaining = total - displayCount;
       var showMoreBtn = remaining > 0
-        ? '<button class="govbb-btn govbb-btn--secondary jp-show-more" type="button" onclick="showMore()">' +
+        ? '<button class="jp-show-more" type="button" onclick="showMore()">' +
             'Show ' + Math.min(remaining, PAGE_SIZE) + ' more' +
-            ' <span style="color:var(--color-mid-grey-00);font-weight:normal">(' + remaining + ' remaining)</span>' +
           '</button>'
         : '';
       var rows = page.map(function(jp) {
