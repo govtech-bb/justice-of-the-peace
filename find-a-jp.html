@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Find a Justice of the Peace - The Government of Barbados</title>
     <link rel="stylesheet" href="https://unpkg.com/@govtech-bb/styles@1.0.0-alpha.16/dist/styles.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
       /* Desktop-first layout — list and map sit side by side. */
       .jp-page {
@@ -85,11 +84,6 @@
         flex-direction: column;
         gap: var(--spacing-xs);
       }
-      .jp-map-hint {
-        color: var(--color-mid-grey-00);
-        font-size: var(--font-size-body-small);
-        margin: 0;
-      }
       /* Plain paragraph treatment — these are content notes, not warnings,
          so they don't need a yellow callout. */
       .jp-disclaimer {
@@ -97,13 +91,6 @@
         color: var(--color-dark-grey-00);
         font-size: var(--font-size-body-small);
         line-height: var(--line-height-body);
-      }
-      #jp-map {
-        /* Responsive: never taller than 620px, never shorter than 380px,
-           and at most 70% of the viewport height on smaller laptops. */
-        height: clamp(380px, 70vh, 620px);
-        width: 100%;
-        border: 1px solid var(--color-light-grey-20);
       }
 
       /* Results meta line above the list */
@@ -304,70 +291,9 @@
         border-color: var(--color-dark-blue-00);
       }
 
-      /* JP marker (icon, not plain dot) */
-      .jp-marker {
-        width: 28px;
-        height: 28px;
-        background: #0F6E56;
-        border: 2px solid #fff;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        font-weight: 700;
-        font-size: 12px;
-        font-family: 'Source Sans Pro', system-ui, sans-serif;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        cursor: pointer;
-      }
-      .jp-marker--cluster {
-        background: var(--color-dark-blue-00);
-        font-size: 11px;
-        padding: 0 4px;
-        min-width: 28px;
-        width: auto;
-        border-radius: 14px;
-      }
-
-      /* Parish clickable labels on map */
-      .jp-parish-btn { background: none; border: none; padding: 0; }
-      .jp-parish-label {
-        display: inline-block;
-        background: #fff;
-        border: 2px solid #0F6E56;
-        border-radius: 999px;
-        padding: 3px 10px;
-        font-size: 12px;
-        font-weight: 700;
-        color: #085041;
-        cursor: pointer;
-        white-space: nowrap;
-        line-height: 1.4;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
-        transform: translate(-50%, -50%);
-        transition: background 150ms, color 150ms, transform 120ms;
-      }
-      .jp-parish-label:hover { background: #0F6E56; color: #fff; transform: translate(-50%, -50%) scale(1.05); }
-      .jp-parish-label--active { background: #0F6E56; color: #fff; }
-
       .jp-show-more {
         margin-top: var(--spacing-s);
         width: 100%;
-      }
-
-      /* Stack the list and map only on smaller viewports. Map comes first. */
-      @media (max-width: 900px) {
-        .jp-search-box { grid-template-columns: 1fr; }
-        .jp-layout {
-          grid-template-columns: 1fr;
-        }
-        .jp-layout__map {
-          position: static;
-          order: 1;
-        }
-        .jp-layout__list { order: 2; }
-        #jp-map { height: 380px; }
       }
 
       /* ─────────────────────────────────────────────────────────────────
@@ -474,10 +400,6 @@
         grid-column: auto;
       }
 
-      /* Map block at the top of the results column */
-      .jp-map-block { margin-bottom: var(--spacing-m); display: flex; flex-direction: column; gap: var(--spacing-xs); }
-      .jp-map-block #jp-map { height: clamp(320px, 50vh, 460px); }
-
       /* Results meta line */
       .finder__count { font-weight: var(--font-weight-bold); margin: 0; }
 
@@ -502,34 +424,14 @@
         flex-direction: column;
         gap: var(--spacing-xs);
       }
-      /* Highlight the card whose JP is focused on the map. */
-      .jp-list__item.shelter:has(.jp-list__btn[aria-pressed="true"]) {
-        border-color: var(--color-teal-00);
-        box-shadow: inset 4px 0 0 var(--color-teal-00);
-      }
-      /* The clickable name (toggles the map pin). Override old grid button. */
-      .jp-list__btn {
-        display: block;
-        width: 100%;
-        text-align: left;
-        background: transparent;
-        border: 0;
-        padding: 0;
-        font: inherit;
-        color: inherit;
-        cursor: pointer;
-      }
-      .jp-list__btn .shelter__name {
+      /* JP name — a plain bold heading on each card. */
+      .shelter__name {
         font-size: var(--font-size-h4);
         line-height: var(--line-height-h4);
         font-weight: var(--font-weight-bold);
         margin: 0;
-        color: var(--color-link);
-        text-decoration: underline;
-        text-underline-offset: 2px;
+        color: var(--color-text);
       }
-      .jp-list__btn:hover .shelter__name { color: var(--color-link-hover); }
-      .jp-list__btn:focus-visible { outline: 4px solid var(--color-teal-100); outline-offset: 2px; }
 
       .shelter__tags { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
       .tag {
@@ -564,12 +466,12 @@
       @media print {
         .govbb-official-banner, .govbb-header, .govbb-status-banner,
         .govbb-breadcrumbs, .govbb-footer, .finder__filters,
-        .jp-map-block, .related-info, .jp-skip-link, .service__feedback,
+        .related-info, .jp-skip-link, .service__feedback,
         .back-link { display: none !important; }
         .finder__grid { display: block; }
         .jp-list.finder__list { display: block; }
         .jp-list__item.shelter { border: 1px solid #999; margin-bottom: 4pt; break-inside: avoid; }
-        .jp-list__btn .shelter__name { color: #000; text-decoration: none; }
+        .shelter__name { color: #000; }
         a { color: #000; text-decoration: none; }
       }
     </style>
@@ -710,15 +612,11 @@
             </aside>
 
             <div class="finder__results">
-              <div class="jp-map-block">
-                <div id="jp-map"></div>
-              </div>
-
               <div id="resultsArea" aria-live="polite" aria-atomic="true">
                 <noscript>
                   <div class="jp-tip">
                     <p class="govbb-text-body">
-                      <strong>This page needs JavaScript to show the JP list and map.</strong>
+                      <strong>This page needs JavaScript to show the JP list.</strong>
                       To get a JP's contact details without JavaScript, call the Office of the Attorney General on
                       <a class="govbb-link" href="tel:+12464677370">(246) 467-7370</a>.
                     </p>
@@ -2990,45 +2888,13 @@
   {id:2207,name:"Shakeda Otesha Williams",parish:"St. Thomas",area:"Airy Cot",community:"Airy Cot",business:"",lat:13.17797,lng:-59.58516}
 ];;
 
-    var PARISH_BOUNDS = {
-      'Christ Church': [[13.045,-59.625],[13.115,-59.490]],
-      'St. Andrew':    [[13.155,-59.595],[13.235,-59.515]],
-      'St. George':    [[13.095,-59.615],[13.175,-59.535]],
-      'St. James':     [[13.115,-59.660],[13.220,-59.610]],
-      'St. John':      [[13.090,-59.535],[13.175,-59.465]],
-      'St. Joseph':    [[13.150,-59.565],[13.225,-59.485]],
-      'St. Lucy':      [[13.210,-59.660],[13.340,-59.550]],
-      'St. Michael':   [[13.065,-59.655],[13.160,-59.570]],
-      'St. Peter':     [[13.190,-59.655],[13.315,-59.575]],
-      'St. Philip':    [[13.040,-59.540],[13.125,-59.425]],
-      'St. Thomas':    [[13.115,-59.645],[13.210,-59.560]],
-    };
-
-    var PARISH_CENTRES = {
-      'Christ Church': [13.075,-59.550], 'St. Andrew':  [13.192,-59.553],
-      'St. George':    [13.135,-59.574], 'St. James':   [13.167,-59.635],
-      'St. John':      [13.130,-59.498], 'St. Joseph':  [13.187,-59.523],
-      'St. Lucy':      [13.278,-59.604], 'St. Michael': [13.112,-59.612],
-      'St. Peter':     [13.253,-59.615], 'St. Philip':  [13.080,-59.482],
-      'St. Thomas':    [13.162,-59.602],
-    };
-
     /* ── State ────────────────────────────────────────────────────────── */
-    var jpMap        = null;
-    var markerLayer  = null;
-    var markerMap    = {};
-    var locationMarker = null;
     var selectedParish = '';
     var currentResults = [];
-    var pickedLocation = null;
-    var focusedJpId    = null;     /* when set, only this JP shows on the map */
-    var searchRadius      = 5;     /* miles; 0 = island-wide */
-    var MILES_TO_KM       = 1.60934;
-    var PAGE_SIZE         = 20;
-    var displayCount      = 20;   /* how many results are currently shown */
-    var radiusCircle      = null;
-    var locationSetByParish = false; /* retained for compatibility; no longer set */
-    var contextSuffix    = ' across all parishes'; /* count-label suffix: " in X" / " near your location" / " across all parishes" */
+    var pickedLocation = null;   /* set by "Use my location"; sorts nearest-first */
+    var PAGE_SIZE      = 20;
+    var displayCount   = 20;     /* how many results are currently shown */
+    var contextSuffix  = ' across all parishes'; /* count-label suffix: " in X" / " near your location" / " across all parishes" */
 
     /* ── Utilities ────────────────────────────────────────────────────── */
     function fuzzy(query, target) {
@@ -3070,12 +2936,7 @@
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
-    function setHint(t) {
-      var el = document.getElementById('jp-map-hint');
-      if (el) el.textContent = t;
-    }
-
-    /* ── Search (works with or without map) ──────────────────────────── */
+    /* ── Search ───────────────────────────────────────────────────────── */
     function renderResults() {
       var results = currentResults;
       var el = document.getElementById('resultsArea');
@@ -3116,7 +2977,6 @@
           ? haversine(pickedLocation.lat, pickedLocation.lng, jp.lat, jp.lng) : null;
         var distLabel = distKm !== null
           ? (distKm < 1 ? Math.round(distKm * 1000) + ' m' : distKm.toFixed(1) + ' km') : '';
-        var focused = (focusedJpId === jp.id);
         var addr = jpAddress(jp);
 
         /* Tag pills — parish always; "Work address" when the home address is
@@ -3137,9 +2997,7 @@
           '" target="_blank" rel="noopener noreferrer">Get directions on Google Maps</a></p>';
 
         return '<li class="jp-list__item shelter" role="listitem">' +
-          '<button type="button" class="jp-list__btn" data-jp-id="' + jp.id + '" onclick="toggleFocus(' + jp.id + ')" aria-pressed="' + (focused ? 'true' : 'false') + '" aria-label="' + esc(jp.name) + ', ' + esc(jp.parish) + (distLabel ? ', ' + distLabel + ' away' : '') + ', show on map">' +
-            '<span class="shelter__name">' + esc(jp.name) + '</span>' +
-          '</button>' +
+          '<h3 class="shelter__name">' + esc(jp.name) + '</h3>' +
           '<div class="shelter__tags">' + tags + '</div>' +
           addressLine +
           directions +
@@ -3151,11 +3009,6 @@
         '</div>' +
         '<ul class="jp-list finder__list" aria-label="JP search results">' + rows + '</ul>' +
         showMoreBtn;
-      /* Keep the map in sync with the visible list — same 20 (or 40, 60...)
-         JPs appear as pins. No-ops until initMap has created markerLayer. */
-      if (jpMap) updateMarkers(page);
-      /* Native <button> handles Enter/Space and focus rings; no manual
-         keydown wiring needed. */
     }
 
     window.showMore = function() {
@@ -3168,14 +3021,6 @@
 
     function runSearch() {
       var parish = document.getElementById('parish').value;
-      /* Changing filters always drops any single-JP focus */
-      focusedJpId = null;
-
-      /* Always sync the active parish label on the map */
-      document.querySelectorAll('.jp-parish-label').forEach(function(b) {
-        b.classList.toggle('jp-parish-label--active', b.getAttribute('data-parish') === parish);
-      });
-
       selectedParish = parish;
       currentResults = JPS.slice();
 
@@ -3183,10 +3028,8 @@
         /* Filter strictly to the chosen parish. */
         currentResults = currentResults.filter(function(jp) { return jp.parish === parish; });
         contextSuffix = ' in ' + parish;
-        if (jpMap && PARISH_BOUNDS[parish]) jpMap.fitBounds(PARISH_BOUNDS[parish], {padding:[30,30]});
       } else {
         contextSuffix = pickedLocation ? ' near your location' : ' across all parishes';
-        if (jpMap && !pickedLocation) jpMap.setView([13.18, -59.555], 11);
       }
 
       /* Free-text search on the JP's name. Every typed word must appear
@@ -3212,15 +3055,12 @@
       }
 
       displayCount = PAGE_SIZE;
-      /* renderResults now drives updateMarkers itself, so the map stays in
-         lockstep with the visible list. */
       renderResults();
     }
 
     function clearSearch() {
       selectedParish = '';
       pickedLocation = null;
-      focusedJpId   = null;
       displayCount = PAGE_SIZE;
       contextSuffix = ' across all parishes';
       document.getElementById('parish').value = '';
@@ -3229,96 +3069,11 @@
       if (geoErr) { geoErr.hidden = true; geoErr.textContent = ''; }
       currentResults = JPS.slice();
       renderResults();
-      document.querySelectorAll('.jp-parish-label').forEach(function(b) { b.classList.remove('jp-parish-label--active'); });
-      if (jpMap) {
-        if (locationMarker) { jpMap.removeLayer(locationMarker); locationMarker = null; }
-        jpMap.setView([13.18,-59.555], 11);
-      }
     }
 
     /* Expose to onclick attributes */
     window.runSearch   = runSearch;
     window.clearSearch = clearSearch;
-
-    /* Apply current focus state to the markers already on the map. When a JP
-       is focused we hide the others by making them transparent and
-       non-interactive, instead of removing/re-adding them — that way the
-       focused marker keeps the same click handler and clicking it again
-       toggles focus off. */
-    function applyMarkerFocus() {
-      Object.keys(markerMap).forEach(function(id) {
-        var m = markerMap[id];
-        var el = m.getElement();
-        if (!el) return;
-        if (focusedJpId === null || parseInt(id, 10) === focusedJpId) {
-          el.style.opacity = '1';
-          el.style.pointerEvents = 'auto';
-        } else {
-          el.style.opacity = '0';
-          el.style.pointerEvents = 'none';
-        }
-      });
-    }
-
-    /* Single source of truth for the pin↔list link.
-       Clicking a list row OR clicking a pin both call this with the same id.
-       First call focuses (highlight row, scroll list, zoom map, open popup,
-       hide other pins). Second call with the same id un-focuses. */
-    window.toggleFocus = function(id) {
-      var same = (focusedJpId === id);
-      /* Reset every row's pressed state — the highlight CSS is keyed off
-         aria-pressed="true" now, so removing the attribute removes the visual. */
-      document.querySelectorAll('.jp-list__btn[aria-pressed="true"]').forEach(function(el) {
-        el.setAttribute('aria-pressed', 'false');
-      });
-      if (same) {
-        focusedJpId = null;
-        if (jpMap) {
-          var fm = markerMap[id];
-          if (fm) fm.closePopup();
-          applyMarkerFocus();
-          if (radiusCircle) {
-            jpMap.fitBounds(radiusCircle.getBounds(), {padding:[20,20]});
-          } else if (selectedParish && PARISH_BOUNDS[selectedParish]) {
-            jpMap.fitBounds(PARISH_BOUNDS[selectedParish], {padding:[30,30]});
-          } else {
-            jpMap.setView([13.18, -59.555], 11);
-          }
-        }
-        return;
-      }
-      focusedJpId = id;
-
-      /* If the focused JP's row isn't currently rendered (it's paginated out),
-         grow displayCount so the row appears in the DOM before we highlight. */
-      var idx = -1;
-      for (var i = 0; i < currentResults.length; i++) {
-        if (currentResults[i].id === id) { idx = i; break; }
-      }
-      if (idx >= 0 && idx + 1 > displayCount) {
-        displayCount = Math.ceil((idx + 1) / PAGE_SIZE) * PAGE_SIZE;
-        renderResults();
-      }
-
-      var btn = document.querySelector('.jp-list__btn[data-jp-id="' + id + '"]');
-      if (btn) {
-        btn.setAttribute('aria-pressed', 'true');
-        btn.scrollIntoView({behavior: 'smooth', block: 'center'});
-      }
-      if (jpMap) {
-        var jp = JPS[id];
-        if (jp && jp.lat && jp.lng) {
-          applyMarkerFocus();
-          jpMap.setView([jp.lat, jp.lng], 15, {animate: true});
-          var marker = markerMap[jp.id];
-          if (marker) marker.openPopup();
-        }
-      }
-    };
-
-    /* Legacy popup button used to call this; the button is gone now but the
-       symbol is kept so older inline handlers don't throw. */
-    window.scrollToCard = function(id) { toggleFocus(id); };
 
     function showGeoError(message) {
       var el = document.getElementById('geoError');
@@ -3349,19 +3104,8 @@
           btn.disabled = false;
           var lat = pos.coords.latitude, lng = pos.coords.longitude;
           pickedLocation = {lat: lat, lng: lng};
-          if (jpMap) {
-            if (locationMarker) { jpMap.removeLayer(locationMarker); }
-            locationMarker = L.circleMarker([lat, lng], {
-              radius:9, fillColor:'#1d70b8', color:'#fff', weight:2.5, fillOpacity:1
-            }).bindPopup('You are here').addTo(jpMap);
-            jpMap.setView([lat, lng], 13, {animate: true});
-            locationMarker.openPopup();
-          }
           /* Location search shows every JP, nearest first; drop any parish. */
           document.getElementById('parish').value = '';
-          document.querySelectorAll('.jp-parish-label').forEach(function(b) {
-            b.classList.remove('jp-parish-label--active');
-          });
           runSearch();
         },
         function(err) {
@@ -3379,130 +3123,9 @@
       );
     };
 
-    /* ── Map-only functions (only called when jpMap exists) ───────────── */
-    function jpIcon() {
-      return L.divIcon({
-        className: '',
-        html: '<div class="jp-marker" aria-hidden="true">JP</div>',
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
-        popupAnchor: [0, -14]
-      });
-    }
-    function updateMarkers(list) {
-      if (!markerLayer) return;
-      markerLayer.clearLayers();
-      markerMap = {};
-      list.forEach(function(jp) {
-        if (!jp.lat || !jp.lng) return;
-        var m = L.marker([jp.lat, jp.lng], { icon: jpIcon(), title: jp.name });
-        var pAddr = jpAddress(jp);
-        var pTag  = pAddr.isWork ? '<em style="color:#666">Work address.</em> ' : '';
-        m.bindPopup(
-          '<strong style="font-size:13px;display:block;margin-bottom:3px">' + esc(jp.name) + '</strong>' +
-          '<span style="font-size:12px;color:#555;display:block">' + esc(jp.parish) + '</span>' +
-          '<span style="font-size:12px;display:block;margin:2px 0 6px">' + pTag + esc(pAddr.text) + '</span>'
-        );
-        /* Clicking a pin focuses the matching list row (and vice versa via
-           toggleFocus). Click again to un-focus and bring all pins back. */
-        m.on('click', function() {
-          if (window.toggleFocus) window.toggleFocus(jp.id);
-        });
-        markerLayer.addLayer(m);
-        markerMap[jp.id] = m;
-      });
-      /* Re-apply focus state in case markers were rebuilt while focused. */
-      applyMarkerFocus();
-    }
-
-    /* ── Leaflet initialisation ──────────────────────────────────────── */
-    /* Keep the map locked onto Barbados — can't pan or zoom away from the island. */
-    var BARBADOS_BOUNDS = L.latLngBounds([12.99, -59.72], [13.36, -59.40]);
-    function initMap() {
-      jpMap = L.map('jp-map', {
-        center: [13.18, -59.555], zoom: 11,
-        minZoom: 10, maxZoom: 16,
-        maxBounds: BARBADOS_BOUNDS,
-        maxBoundsViscosity: 1.0,
-        scrollWheelZoom: true, touchZoom: true, doubleClickZoom: true
-      });
-      /* CARTO Voyager tiles — OSM-based but with cleaner road and place labels
-         than the raw OpenStreetMap raster. Free, no API key required.
-         Falls back automatically to OSM if Carto is unreachable. */
-      var cartoTiles = L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-        {
-          subdomains: 'abcd',
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-          minZoom: 10, maxZoom: 16,
-          bounds: BARBADOS_BOUNDS
-        }
-      );
-      cartoTiles.on('tileerror', function() {
-        if (!jpMap.hasLayer(osmTiles)) osmTiles.addTo(jpMap);
-      });
-      var osmTiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        minZoom: 10, maxZoom: 16,
-        bounds: BARBADOS_BOUNDS
-      });
-      cartoTiles.addTo(jpMap);
-      markerLayer = L.layerGroup().addTo(jpMap);
-
-      /* Dedicated pane so parish buttons always sit above JP icons */
-      jpMap.createPane('parishLabels');
-      jpMap.getPane('parishLabels').style.zIndex = 650;
-      jpMap.getPane('parishLabels').style.pointerEvents = 'auto';
-
-      /* Parish pill labels — placed near the top edge of each parish, away
-         from the typical JP cluster which sits closer to the centre. */
-      Object.keys(PARISH_BOUNDS).forEach(function(p) {
-        var b = PARISH_BOUNDS[p];           // [[minLat,minLng],[maxLat,maxLng]]
-        var labelLat = b[1][0] - (b[1][0] - b[0][0]) * 0.18;
-        var labelLng = (b[0][1] + b[1][1]) / 2;
-        L.marker([labelLat, labelLng], {
-          pane: 'parishLabels',
-          interactive: true,
-          icon: L.divIcon({
-            className: '',
-            html: '<button type="button" class="jp-parish-label" data-parish="' + p + '">' + p + '</button>',
-            iconSize: null,
-            iconAnchor: [0, 0]
-          })
-        }).addTo(jpMap);
-      });
-
-      /* Click on a parish label */
-      document.getElementById('jp-map').addEventListener('click', function(e) {
-        var b = e.target.closest('.jp-parish-label');
-        if (!b) return;
-        var name = b.getAttribute('data-parish');
-        selectedParish = name;
-        document.getElementById('parish').value = name;
-        document.querySelectorAll('.jp-parish-label').forEach(function(lb) {
-          lb.classList.toggle('jp-parish-label--active', lb.getAttribute('data-parish') === name);
-        });
-        jpMap.fitBounds(PARISH_BOUNDS[name], {padding:[30,30]});
-        runSearch();
-        setHint('Choose a JP icon to see who they are, or pick a name from the list.');
-      });
-
-      /* Safety: in case the initial inline-script render was somehow
-         skipped, populate the list now. ensureDefaultList no-ops if the
-         list is already filled. */
-      if (typeof ensureDefaultList === 'function') ensureDefaultList();
-
-      /* Re-render markers from the current paginated view (renderResults
-         already ran while markerLayer didn't exist yet, so its updateMarkers
-         no-op'd; do it now). */
-      updateMarkers(currentResults.slice(0, displayCount));
-      setHint('Every JP icon you see is a Justice of the Peace. Pick a parish or use your location to narrow the list.');
-    }
-
     /* ── Initial state ────────────────────────────────────────────────
-       Belt-and-braces: call the populator now, AND again on
-       DOMContentLoaded, AND from initMap. If any single path is delayed
-       or skipped for any reason the others guarantee the list shows. */
+       Belt-and-braces: populate the list now, AND on DOMContentLoaded,
+       AND on window load, so the list shows even if one path is delayed. */
     function ensureDefaultList() {
       var el = document.getElementById('resultsArea');
       /* Skip if the list itself has already been rendered. The <noscript>
@@ -3520,8 +3143,5 @@
     }
     window.addEventListener('load', ensureDefaultList);
     </script>
-
-    <!-- Leaflet loaded last so initMap is already defined when onload fires -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" onload="initMap()"></script>
   </body>
 </html>
